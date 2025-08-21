@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Flow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .container {
+            max-width: 960px;
+        }
+        .input-group textarea {
+            min-height: 120px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="container mx-auto bg-white rounded-xl shadow-lg p-8 space-y-8 border border-gray-200">
+        <header class="text-center">
+            <h1 class="text-3xl font-bold text-gray-800">Nexus Flow IA</h1>
+            <p class="text-gray-500 mt-2">Interactúa con el modelo de IA para la productividad</p>
+        </header>
+
+        <!-- Contenedor para la Matriz de Eisenhower -->
+        <div class="space-y-4">
+            <h2 class="text-2xl font-semibold text-gray-700">Matriz de Eisenhower</h2>
+            <div class="input-group">
+                <textarea id="eisenhower-input" class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Ej: 'Responder 50 correos electrónicos urgentes.'"></textarea>
+                <button onclick="analyzeEisenhower()" class="mt-4 w-full bg-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-purple-700 transition duration-300 shadow-md">
+                    Analizar Tarea
+                </button>
+            </div>
+            <div id="eisenhower-result" class="bg-gray-100 p-4 rounded-lg text-gray-800 min-h-[60px] flex items-center justify-start text-left">
+                <p>El resultado aparecerá aquí...</p>
+            </div>
+        </div>
+
+        <hr class="border-t border-gray-200">
+
+        <!-- Contenedor para la Ley de Laborit -->
+        <div class="space-y-4">
+            <h2 class="text-2xl font-semibold text-gray-700">Ley de Laborit y Pareto</h2>
+            <div class="input-group">
+                <textarea id="laborit-input" class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Ej:
+- Escribir informe (2 horas)
+- Responder emails (30 min)
+- Llamada con cliente (1 hora)"></textarea>
+                <button onclick="analyzeLaborit()" class="mt-4 w-full bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition duration-300 shadow-md">
+                    Analizar Lista
+                </button>
+            </div>
+            <div id="laborit-result" class="bg-gray-100 p-4 rounded-lg text-gray-800 min-h-[60px] flex items-center justify-start text-left">
+                <p>El resultado aparecerá aquí...</p>
+            </div>
+        </div>
+
+        <hr class="border-t border-gray-200">
+
+        <!-- Contenedor para la Ley de Yerkes-Dodson -->
+        <div class="space-y-4">
+            <h2 class="text-2xl font-semibold text-gray-700">Ley de Yerkes-Dodson e Illich</h2>
+            <div class="input-group">
+                <textarea id="yerkes-dodson-input" class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Ej:
+- 9 AM - 1 PM: Codificar
+- 1 PM - 2 PM: Almuerzo
+- 2 PM - 6 PM: Continuar codificando"></textarea>
+                <button onclick="analyzeYerkesDodson()" class="mt-4 w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md">
+                    Analizar Plan Diario
+                </button>
+            </div>
+            <div id="yerkes-dodson-result" class="bg-gray-100 p-4 rounded-lg text-gray-800 min-h-[60px] flex items-center justify-start text-left">
+                <p>El resultado aparecerá aquí...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Función para mostrar un mensaje de carga
+        function showLoading(elementId) {
+            document.getElementById(elementId).innerHTML = '<div class="flex items-center justify-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Cargando...</div>';
+        }
+
+        // Función genérica para enviar la solicitud al servidor de backend local
+        // Ahora usamos rutas relativas ya que el HTML es servido por el mismo servidor.
+        async function callBackendApi(endpoint, data) {
+            try {
+                const response = await fetch(`/api/${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error);
+                }
+
+                const result = await response.json();
+                return result.result;
+            } catch (error) {
+                console.error('Error al llamar al servidor de backend:', error);
+                return `Ocurrió un error al procesar tu solicitud: ${error.message}`;
+            }
+        }
+
+        // Función para el botón de la Matriz de Eisenhower
+        async function analyzeEisenhower() {
+            const input = document.getElementById('eisenhower-input').value;
+            const resultDiv = document.getElementById('eisenhower-result');
+            showLoading('eisenhower-result');
+            
+            const response = await callBackendApi('eisenhower', { task: input });
+            resultDiv.innerHTML = `<pre class="whitespace-pre-wrap">${response}</pre>`;
+        }
+
+        // Función para el botón de la Ley de Laborit
+        async function analyzeLaborit() {
+            const input = document.getElementById('laborit-input').value;
+            const resultDiv = document.getElementById('laborit-result');
+            showLoading('laborit-result');
+            
+            const response = await callBackendApi('laborit', { tasks: input });
+            resultDiv.innerHTML = `<pre class="whitespace-pre-wrap">${response}</pre>`;
+        }
+
+        // Función para el botón de la Ley de Yerkes-Dodson
+        async function analyzeYerkesDodson() {
+            const input = document.getElementById('yerkes-dodson-input').value;
+            const resultDiv = document.getElementById('yerkes-dodson-result');
+            showLoading('yerkes-dodson-result');
+
+            const response = await callBackendApi('yerkes-dodson', { plan: input });
+            resultDiv.innerHTML = `<pre class="whitespace-pre-wrap">${response}</pre>`;
+        }
+    </script>
+
+</body>
+</html>
