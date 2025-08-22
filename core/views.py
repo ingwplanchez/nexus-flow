@@ -31,8 +31,10 @@ def index(request):
     Ahora solo es accesible para usuarios logueados.
     """
     tasks = Task.objects.filter(user=request.user).order_by('-created_at')
+    daily_plans = DailyPlan.objects.filter(user=request.user).order_by('-created_at')
     context = {
-        'tasks': tasks
+        'tasks': tasks,
+        'daily_plans': daily_plans
     }
     return render(request, 'index.html', context)
 

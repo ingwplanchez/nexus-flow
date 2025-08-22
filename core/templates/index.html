@@ -106,6 +106,26 @@
                 <p>El resultado aparecerá aquí...</p>
             </div>
         </div>
+
+        <hr class="border-t border-gray-200">
+
+        <!-- Lista de Planes Diarios Guardados -->
+        <div class="space-y-4">
+            <h2 class="text-2xl font-semibold text-gray-700">Tus Planes Diarios Guardados</h2>
+            {% if daily_plans %}
+                <ul class="space-y-2">
+                    {% for plan in daily_plans %}
+                        <li class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <p class="font-bold">Plan del día:</p>
+                            <pre class="text-sm text-gray-600 whitespace-pre-wrap">{{ plan.plan_text }}</pre>
+                            <p class="text-xs text-gray-400">Creado el: {{ plan.created_at|date:"F j, Y, P" }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-gray-500">No tienes planes diarios guardados aún.</p>
+            {% endif %}
+        </div>
     </div>
 
     <script>
