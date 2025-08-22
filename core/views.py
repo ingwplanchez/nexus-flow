@@ -4,8 +4,11 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.decorators import login_required
 
 # Carga las variables de entorno para la clave de API
 load_dotenv()
@@ -23,6 +26,42 @@ def index(request):
     """Ruta principal que renderiza el archivo index.html."""
     return render(request, 'index.html')
 
+def signup_view(request):
+    """Vista para el registro de nuevos usuarios."""
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('index')  # Redirige a la página principal después del registro
+    else:
+        form = UserCreationForm()
+    return render(request, 'auth/signup.html', {'form': form})
+
+def login_view(request):
+    """Vista para el inicio de sesión de usuarios."""
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('index') # Redirige a la página principal
+    else:
+        form = AuthenticationForm()
+    return render(request, 'auth/login.html', {'form': form})
+
+def logout_view(request):
+    """Vista para cerrar la sesión del usuario."""
+    if request.method == 'POST':
+        logout(request)
+        return redirect('index') # Redirige a la página principal
+
+# La decoración @login_required asegura que solo los usuarios autenticados
+# puedan acceder a las siguientes vistas.
+@login_required
 @csrf_exempt
 def analyze_eisenhower(request):
     """Endpoint para la Matriz de Eisenhower."""
@@ -55,6 +94,7 @@ def analyze_eisenhower(request):
             return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "Método no permitido."}, status=405)
 
+@login_required
 @csrf_exempt
 def analyze_laborit(request):
     """Endpoint para la Ley de Laborit."""
@@ -85,6 +125,7 @@ def analyze_laborit(request):
             return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "Método no permitido."}, status=405)
 
+@login_required
 @csrf_exempt
 def analyze_yerkes_dodson(request):
     """Endpoint para la Ley de Yerkes-Dodson."""
