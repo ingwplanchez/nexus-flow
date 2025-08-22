@@ -22,9 +22,17 @@
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
 
     <div class="container mx-auto bg-white rounded-xl shadow-lg p-8 space-y-8 border border-gray-200">
-        <header class="text-center">
-            <h1 class="text-3xl font-bold text-gray-800">Nexus Flow IA</h1>
-            <p class="text-gray-500 mt-2">Interactúa con el modelo de IA para la productividad</p>
+        <header class="flex justify-between items-center mb-6">
+            <div class="text-left">
+                <h1 class="text-3xl font-bold text-gray-800">Nexus Flow IA</h1>
+                <p class="text-gray-500 mt-2">Hola, {{ request.user.username }}</p>
+            </div>
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition duration-300">
+                    Cerrar Sesión
+                </button>
+            </form>
         </header>
 
         <!-- Contenedor para la Matriz de Eisenhower -->
@@ -36,9 +44,29 @@
                     Analizar Tarea
                 </button>
             </div>
-            <div id="eisenhower-result" class="bg-gray-100 p-4 rounded-lg text-gray-800 min-h-[60px] flex items-center justify-start text-left">
+            <div id="eisenhower-result" class="bg-gray-100 p-4 rounded-lg text-gray-800 min-h-[60px] flex items-center justify-center text-left">
                 <p>El resultado aparecerá aquí...</p>
             </div>
+        </div>
+
+        <hr class="border-t border-gray-200">
+
+        <!-- Lista de Tareas Guardadas -->
+        <div class="space-y-4">
+            <h2 class="text-2xl font-semibold text-gray-700">Tus Tareas Guardadas</h2>
+            {% if tasks %}
+                <ul class="space-y-2">
+                    {% for task in tasks %}
+                        <li class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <p class="font-bold">{{ task.description }}</p>
+                            <p class="text-sm text-gray-600">Categoría: {{ task.eisenhower_category }}</p>
+                            <p class="text-xs text-gray-400">Creada el: {{ task.created_at|date:"F j, Y, P" }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-gray-500">No tienes tareas guardadas aún.</p>
+            {% endif %}
         </div>
 
         <hr class="border-t border-gray-200">
@@ -55,7 +83,7 @@
                     Analizar Lista
                 </button>
             </div>
-            <div id="laborit-result" class="bg-gray-100 p-4 rounded-lg text-gray-800 min-h-[60px] flex items-center justify-start text-left">
+            <div id="laborit-result" class="bg-gray-100 p-4 rounded-lg text-gray-800 min-h-[60px] flex items-center justify-center text-left">
                 <p>El resultado aparecerá aquí...</p>
             </div>
         </div>
@@ -74,20 +102,17 @@
                     Analizar Plan Diario
                 </button>
             </div>
-            <div id="yerkes-dodson-result" class="bg-gray-100 p-4 rounded-lg text-gray-800 min-h-[60px] flex items-center justify-start text-left">
+            <div id="yerkes-dodson-result" class="bg-gray-100 p-4 rounded-lg text-gray-800 min-h-[60px] flex items-center justify-center text-left">
                 <p>El resultado aparecerá aquí...</p>
             </div>
         </div>
     </div>
 
     <script>
-        // Función para mostrar un mensaje de carga
         function showLoading(elementId) {
             document.getElementById(elementId).innerHTML = '<div class="flex items-center justify-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Cargando...</div>';
         }
 
-        // Función genérica para enviar la solicitud al servidor de backend local
-        // Ahora usamos rutas relativas ya que el HTML es servido por el mismo servidor.
         async function callBackendApi(endpoint, data) {
             try {
                 const response = await fetch(`/api/${endpoint}`, {
@@ -111,7 +136,6 @@
             }
         }
 
-        // Función para el botón de la Matriz de Eisenhower
         async function analyzeEisenhower() {
             const input = document.getElementById('eisenhower-input').value;
             const resultDiv = document.getElementById('eisenhower-result');
@@ -121,7 +145,6 @@
             resultDiv.innerHTML = `<pre class="whitespace-pre-wrap">${response}</pre>`;
         }
 
-        // Función para el botón de la Ley de Laborit
         async function analyzeLaborit() {
             const input = document.getElementById('laborit-input').value;
             const resultDiv = document.getElementById('laborit-result');
@@ -131,7 +154,6 @@
             resultDiv.innerHTML = `<pre class="whitespace-pre-wrap">${response}</pre>`;
         }
 
-        // Función para el botón de la Ley de Yerkes-Dodson
         async function analyzeYerkesDodson() {
             const input = document.getElementById('yerkes-dodson-input').value;
             const resultDiv = document.getElementById('yerkes-dodson-result');
@@ -141,6 +163,5 @@
             resultDiv.innerHTML = `<pre class="whitespace-pre-wrap">${response}</pre>`;
         }
     </script>
-
 </body>
 </html>

@@ -10,6 +10,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
 
+from .models import Task, DailyPlan # Importamos los modelos
+
 # Carga las variables de entorno para la clave de API
 load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY")
@@ -22,9 +24,17 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash')
 
+@login_required
 def index(request):
-    """Ruta principal que renderiza el archivo index.html."""
-    return render(request, 'index.html')
+    """
+    Ruta principal que renderiza el archivo index.html.
+    Ahora solo es accesible para usuarios logueados.
+    """
+    tasks = Task.objects.filter(user=request.user).order_by('-created_at')
+    context = {
+        'tasks': tasks
+    }
+    return render(request, 'index.html', context)
 
 def signup_view(request):
     """Vista para el registro de nuevos usuarios."""
@@ -57,14 +67,12 @@ def logout_view(request):
     """Vista para cerrar la sesión del usuario."""
     if request.method == 'POST':
         logout(request)
-        return redirect('index') # Redirige a la página principal
+        return redirect('login') # Redirige a la página de inicio de sesión
 
-# La decoración @login_required asegura que solo los usuarios autenticados
-# puedan acceder a las siguientes vistas.
 @login_required
 @csrf_exempt
 def analyze_eisenhower(request):
-    """Endpoint para la Matriz de Eisenhower."""
+    """Endpoint para la Matriz de Eisenhower. Ahora guarda la tarea."""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -89,7 +97,20 @@ def analyze_eisenhower(request):
             - Justificación: [Una breve explicación]
             """
             response = model.generate_content(prompt)
-            return JsonResponse({"result": response.text})
+            result_text = response.text
+
+            # Extraemos la categoría del resultado de la IA
+            category_line = next((line for line in result_text.splitlines() if line.startswith('- Categoría:')), None)
+            category = category_line.split(':')[1].strip() if category_line else "No especificada"
+
+            # Creamos y guardamos la tarea en la base de datos
+            Task.objects.create(
+                user=request.user,
+                description=task_description,
+                eisenhower_category=category
+            )
+            
+            return JsonResponse({"result": result_text})
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "Método no permitido."}, status=405)
@@ -128,7 +149,7 @@ def analyze_laborit(request):
 @login_required
 @csrf_exempt
 def analyze_yerkes_dodson(request):
-    """Endpoint para la Ley de Yerkes-Dodson."""
+    """Endpoint para la Ley de Yerkes-Dodson. Ahora guarda el plan."""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -151,7 +172,15 @@ def analyze_yerkes_dodson(request):
             - Sugerencia (Yerkes-Dodson e Illich): [El plan ajustado con la lista de tareas]
             """
             response = model.generate_content(prompt)
-            return JsonResponse({"result": response.text})
+            result_text = response.text
+
+            # Guardamos el plan en la base de datos
+            DailyPlan.objects.create(
+                user=request.user,
+                plan_text=daily_plan
+            )
+            
+            return JsonResponse({"result": result_text})
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "Método no permitido."}, status=405)
