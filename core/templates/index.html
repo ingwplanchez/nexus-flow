@@ -51,8 +51,10 @@
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
             <div class="text-left mb-4 md:mb-0">
                 <h1 class="text-4xl font-extrabold text-gray-900">Nexus Flow IA</h1>
+                <!-- Este placeholder es de Django/Jinja, solo funcionará si el backend lo procesa -->
                 <p class="text-gray-500 mt-2 text-lg">Hola, {{ request.user.username }}</p>
             </div>
+            <!-- Este formulario es de Django, solo funcionará si el backend lo procesa -->
             <form action="{% url 'logout' %}" method="post">
                 {% csrf_token %}
                 <button type="submit" class="bg-red-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-red-700 transition duration-300 shadow-lg">
@@ -84,21 +86,11 @@
         <!-- Lista de Tareas Guardadas -->
         <div class="space-y-6">
             <h2 class="text-2xl font-semibold text-gray-700">Historial de Tareas</h2>
-            {% if tasks %}
-                <ul class="grid md:grid-cols-2 gap-4">
-                    {% for task in tasks %}
-                        <li class="bg-gray-100 p-6 rounded-xl border border-gray-200 shadow-sm">
-                            <p class="font-semibold text-lg">{{ task.description }}</p>
-                            <p class="text-sm text-gray-600 mt-1">
-                                <span class="font-bold">Categoría:</span> {{ task.eisenhower_category }}
-                            </p>
-                            <p class="text-xs text-gray-400 mt-2">Guardada el: {{ task.created_at|date:"F j, Y, P" }}</p>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p class="text-gray-500 text-center">No tienes tareas guardadas aún.</p>
-            {% endif %}
+            <!-- Este contenedor se llenará completamente con JavaScript.
+                 Se eliminan las etiquetas de plantilla de Django para evitar errores. -->
+            <ul id="tasks-list" class="grid md:grid-cols-2 gap-4">
+                <p class="text-gray-500 text-center">Cargando tareas...</p>
+            </ul>
         </div>
 
         <hr class="border-t-2 border-gray-200">
@@ -152,27 +144,22 @@
         <!-- Lista de Planes Diarios Guardados -->
         <div class="space-y-6">
             <h2 class="text-2xl font-semibold text-gray-700">Historial de Planes Diarios</h2>
-            {% if daily_plans %}
-                <ul class="grid md:grid-cols-2 gap-4">
-                    {% for plan in daily_plans %}
-                        <li class="bg-gray-100 p-6 rounded-xl border border-gray-200 shadow-sm">
-                            <p class="font-semibold text-lg">Plan del día:</p>
-                            <pre class="text-sm text-gray-600 whitespace-pre-wrap mt-1">{{ plan.plan_text }}</pre>
-                            <p class="text-xs text-gray-400 mt-2">Guardado el: {{ plan.created_at|date:"F j, Y, P" }}</p>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p class="text-gray-500 text-center">No tienes planes diarios guardados aún.</p>
-            {% endif %}
+            <!-- Este contenedor se llenará completamente con JavaScript.
+                 Se eliminan las etiquetas de plantilla de Django para evitar errores. -->
+            <ul id="daily-plans-list" class="grid md:grid-cols-2 gap-4">
+                <p class="text-gray-500 text-center">Cargando planes...</p>
+            </ul>
         </div>
     </div>
 
     <script>
+        // Función para mostrar un indicador de carga
         function showLoading(elementId) {
-            document.getElementById(elementId).innerHTML = '<div class="flex items-center justify-center text-gray-500"><svg class="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Cargando...</div>';
+            const resultDiv = document.getElementById(elementId);
+            resultDiv.innerHTML = '<div class="flex items-center justify-center text-gray-500"><svg class="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Cargando...</div>';
         }
-        
+
+        // Función general para llamar a la API del backend
         async function callBackendApi(endpoint, data, resultDivId) {
             const resultDiv = document.getElementById(resultDivId);
             showLoading(resultDivId);
@@ -194,7 +181,13 @@
                 const result = await response.json();
                 resultDiv.innerHTML = `<pre class="whitespace-pre-wrap">${result.result}</pre>`;
                 resultDiv.classList.remove('bg-red-50');
-                resultDiv.classList.add('bg-purple-50', 'bg-green-50', 'bg-blue-50');
+                if (resultDivId.includes('eisenhower')) {
+                    resultDiv.classList.add('bg-purple-50');
+                } else if (resultDivId.includes('laborit')) {
+                    resultDiv.classList.add('bg-green-50');
+                } else {
+                    resultDiv.classList.add('bg-blue-50');
+                }
                 return result.result;
 
             } catch (error) {
@@ -204,12 +197,89 @@
                 resultDiv.classList.add('bg-red-50');
             }
         }
+        
+        // **NUEVAS FUNCIONES PARA ACTUALIZAR LAS LISTAS**
+        async function fetchAndRenderTasks() {
+            const tasksList = document.getElementById('tasks-list');
+            try {
+                const response = await fetch('/api/tasks');
+                const data = await response.json();
 
+                if (!response.ok) {
+                    throw new Error(data.error);
+                }
+                
+                tasksList.innerHTML = ''; // Limpiar la lista actual
+                if (data.tasks.length === 0) {
+                    tasksList.innerHTML = '<p class="text-gray-500 text-center">No tienes tareas guardadas aún.</p>';
+                    return;
+                }
+
+                data.tasks.forEach(task => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'bg-gray-100 p-6 rounded-xl border border-gray-200 shadow-sm';
+                    listItem.innerHTML = `
+                        <p class="font-semibold text-lg">${task.description}</p>
+                        <p class="text-sm text-gray-600 mt-1">
+                            <span class="font-bold">Categoría:</span> ${task.eisenhower_category}
+                        </p>
+                        <p class="text-xs text-gray-400 mt-2">Guardada el: ${new Date(task.created_at).toLocaleString()}</p>
+                    `;
+                    tasksList.appendChild(listItem);
+                });
+
+            } catch (error) {
+                console.error('Error al obtener las tareas:', error);
+                tasksList.innerHTML = `<p class="text-red-600 text-center">Error al cargar el historial.</p>`;
+            }
+        }
+
+        async function fetchAndRenderDailyPlans() {
+            const plansList = document.getElementById('daily-plans-list');
+            try {
+                const response = await fetch('/api/daily-plans');
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error);
+                }
+                
+                plansList.innerHTML = ''; // Limpiar la lista actual
+                if (data.daily_plans.length === 0) {
+                    plansList.innerHTML = '<p class="text-gray-500 text-center">No tienes planes diarios guardados aún.</p>';
+                    return;
+                }
+
+                data.daily_plans.forEach(plan => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'bg-gray-100 p-6 rounded-xl border border-gray-200 shadow-sm';
+                    listItem.innerHTML = `
+                        <p class="font-semibold text-lg">Plan del día:</p>
+                        <pre class="text-sm text-gray-600 whitespace-pre-wrap mt-1">${plan.plan_text}</pre>
+                        <p class="text-xs text-gray-400 mt-2">Guardado el: ${new Date(plan.created_at).toLocaleString()}</p>
+                    `;
+                    plansList.appendChild(listItem);
+                });
+
+            } catch (error) {
+                console.error('Error al obtener los planes diarios:', error);
+                plansList.innerHTML = `<p class="text-red-600 text-center">Error al cargar el historial.</p>`;
+            }
+        }
+
+        // Llamar a las funciones de renderizado al cargar la página
+        window.onload = () => {
+            fetchAndRenderTasks();
+            fetchAndRenderDailyPlans();
+        };
+
+
+        // **FUNCIONES DE ANALISIS ACTUALIZADAS**
         async function analyzeEisenhower() {
             const input = document.getElementById('eisenhower-input').value;
+            // No recargamos la página, solo actualizamos la lista
             await callBackendApi('eisenhower', { task: input }, 'eisenhower-result');
-            // Recargar la página para mostrar las tareas actualizadas
-            setTimeout(() => window.location.reload(), 1000); 
+            fetchAndRenderTasks(); // Llama a la nueva función
         }
 
         async function analyzeLaborit() {
@@ -219,9 +289,9 @@
 
         async function analyzeYerkesDodson() {
             const input = document.getElementById('yerkes-dodson-input').value;
+            // No recargamos la página, solo actualizamos la lista
             await callBackendApi('yerkes-dodson', { plan: input }, 'yerkes-dodson-result');
-            // Recargar la página para mostrar los planes actualizados
-            setTimeout(() => window.location.reload(), 1000);
+            fetchAndRenderDailyPlans(); // Llama a la nueva función
         }
     </script>
 </body>
