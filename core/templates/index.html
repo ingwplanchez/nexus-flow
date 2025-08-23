@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,15 +11,19 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap');
+
         body {
             font-family: 'Inter', sans-serif;
         }
+
         .container {
             max-width: 960px;
         }
+
         .input-group textarea {
             min-height: 120px;
         }
+
         .section-card {
             background-color: #f9fafb;
             border-radius: 1rem;
@@ -27,17 +32,21 @@
             border: 1px solid #e5e7eb;
             transition: transform 0.3s ease;
         }
+
         .section-card:hover {
             transform: translateY(-5px);
         }
+
         .button-primary {
             background-image: linear-gradient(to right, var(--tw-gradient-stops));
             transition: all 0.3s ease;
         }
+
         .button-primary:hover {
             opacity: 0.9;
             transform: translateY(-2px);
         }
+
         .icon-large {
             font-size: 2.5rem;
             margin-right: 1rem;
@@ -45,22 +54,21 @@
         }
     </style>
 </head>
+
 <body class="bg-gray-50 flex items-center justify-center min-h-screen p-6 text-gray-800">
 
     <div class="container mx-auto bg-white rounded-3xl shadow-2xl p-10 space-y-12 border border-gray-200">
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
             <div class="text-left mb-4 md:mb-0">
                 <h1 class="text-4xl font-extrabold text-gray-900">Nexus Flow IA</h1>
-                <!-- Este placeholder es de Django/Jinja, solo funcionará si el backend lo procesa -->
-                <p class="text-gray-500 mt-2 text-lg">Hola, {{ request.user.username }}</p>
+                <p class="text-gray-500 mt-2 text-lg">Hola, usuario</p>
             </div>
-            <!-- Este formulario es de Django, solo funcionará si el backend lo procesa -->
-            <form action="{% url 'logout' %}" method="post">
-                {% csrf_token %}
-                <button type="submit" class="bg-red-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-red-700 transition duration-300 shadow-lg">
-                    Cerrar Sesión
-                </button>
-            </form>
+            <!-- Botón de cerrar sesión solo para contexto, no funcional sin un backend -->
+            <button
+                class="bg-red-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-red-700 transition duration-300 shadow-lg"
+                onclick="location.href='{% url 'logout' %}'">
+                Cerrar Sesión
+            </button>
         </header>
 
         <!-- Contenedor para la Matriz de Eisenhower -->
@@ -71,12 +79,16 @@
             </div>
             <p class="text-gray-500 mb-6">Clasifica tus tareas por importancia y urgencia.</p>
             <div class="input-group mb-6">
-                <textarea id="eisenhower-input" class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-purple-200 resize-none" placeholder="Ej: 'Responder 50 correos electrónicos urgentes.'"></textarea>
-                <button onclick="analyzeEisenhower()" class="mt-4 w-full text-white font-bold py-3 px-6 rounded-lg shadow-lg button-primary from-purple-500 to-indigo-600">
+                <textarea id="eisenhower-input"
+                    class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-purple-200 resize-none"
+                    placeholder="Ej: 'Responder 50 correos electrónicos urgentes.'"></textarea>
+                <button onclick="analyzeEisenhower()"
+                    class="mt-4 w-full text-white font-bold py-3 px-6 rounded-lg shadow-lg button-primary from-purple-500 to-indigo-600">
                     Analizar Tarea
                 </button>
             </div>
-            <div id="eisenhower-result" class="bg-purple-50 p-6 rounded-lg text-gray-700 min-h-[60px] flex items-center text-left border-l-4 border-purple-400">
+            <div id="eisenhower-result"
+                class="bg-purple-50 p-6 rounded-lg text-gray-700 min-h-[60px] flex items-center text-left border-l-4 border-purple-400">
                 <p>El resultado aparecerá aquí...</p>
             </div>
         </div>
@@ -103,15 +115,19 @@
             </div>
             <p class="text-gray-500 mb-6">Identifica la tarea más importante para empezar tu día.</p>
             <div class="input-group mb-6">
-                <textarea id="laborit-input" class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-green-200 resize-none" placeholder="Ej:
+                <textarea id="laborit-input"
+                    class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-green-200 resize-none"
+                    placeholder="Ej:
 - Escribir informe (2 horas)
 - Responder emails (30 min)
 - Llamada con cliente (1 hora)"></textarea>
-                <button onclick="analyzeLaborit()" class="mt-4 w-full text-white font-bold py-3 px-6 rounded-lg shadow-lg button-primary from-green-500 to-teal-600">
+                <button onclick="analyzeLaborit()"
+                    class="mt-4 w-full text-white font-bold py-3 px-6 rounded-lg shadow-lg button-primary from-green-500 to-teal-600">
                     Analizar Lista
                 </button>
             </div>
-            <div id="laborit-result" class="bg-green-50 p-6 rounded-lg text-gray-700 min-h-[60px] flex items-center text-left border-l-4 border-green-400">
+            <div id="laborit-result"
+                class="bg-green-50 p-6 rounded-lg text-gray-700 min-h-[60px] flex items-center text-left border-l-4 border-green-400">
                 <p>El resultado aparecerá aquí...</p>
             </div>
         </div>
@@ -126,15 +142,19 @@
             </div>
             <p class="text-gray-500 mb-6">Optimiza tu plan de trabajo para evitar el agotamiento.</p>
             <div class="input-group mb-6">
-                <textarea id="yerkes-dodson-input" class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-200 resize-none" placeholder="Ej:
+                <textarea id="yerkes-dodson-input"
+                    class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-200 resize-none"
+                    placeholder="Ej:
 - 9 AM - 1 PM: Codificar
 - 1 PM - 2 PM: Almuerzo
 - 2 PM - 6 PM: Continuar codificando"></textarea>
-                <button onclick="analyzeYerkesDodson()" class="mt-4 w-full text-white font-bold py-3 px-6 rounded-lg shadow-lg button-primary from-blue-500 to-cyan-600">
+                <button onclick="analyzeYerkesDodson()"
+                    class="mt-4 w-full text-white font-bold py-3 px-6 rounded-lg shadow-lg button-primary from-blue-500 to-cyan-600">
                     Analizar Plan Diario
                 </button>
             </div>
-            <div id="yerkes-dodson-result" class="bg-blue-50 p-6 rounded-lg text-gray-700 min-h-[60px] flex items-center text-left border-l-4 border-blue-400">
+            <div id="yerkes-dodson-result"
+                class="bg-blue-50 p-6 rounded-lg text-gray-700 min-h-[60px] flex items-center text-left border-l-4 border-blue-400">
                 <p>El resultado aparecerá aquí...</p>
             </div>
         </div>
@@ -165,10 +185,14 @@
             showLoading(resultDivId);
 
             try {
-                const response = await fetch(`/api/${endpoint}`, {
+                // Se ajusta la URL para que sea absoluta, evitando el error de "Failed to parse URL"
+                const url = window.location.origin + `/api/${endpoint}/`;
+                console.log('Llamando a la URL:', url);
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
                     },
                     body: JSON.stringify(data)
                 });
@@ -197,18 +221,38 @@
                 resultDiv.classList.add('bg-red-50');
             }
         }
-        
-        // **NUEVAS FUNCIONES PARA ACTUALIZAR LAS LISTAS**
+
+        // Función para obtener el token CSRF de las cookies, necesario para Django
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // **NUEVAS FUNCIONES PARA CARGAR EL HISTORIAL DESDE EL BACKEND**
         async function fetchAndRenderTasks() {
             const tasksList = document.getElementById('tasks-list');
+            tasksList.innerHTML = '<p class="text-gray-500 text-center">Cargando tareas...</p>';
             try {
-                const response = await fetch('/api/tasks');
+                // Se ajusta la URL para que sea absoluta, evitando el error de "Failed to parse URL"
+                const url = window.location.origin + '/api/tasks/';
+                console.log('Llamando a la URL:', url);
+                const response = await fetch(url);
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.error);
+                    throw new Error(data.error || 'Error al obtener el historial.');
                 }
-                
+
                 tasksList.innerHTML = ''; // Limpiar la lista actual
                 if (data.tasks.length === 0) {
                     tasksList.innerHTML = '<p class="text-gray-500 text-center">No tienes tareas guardadas aún.</p>';
@@ -218,32 +262,38 @@
                 data.tasks.forEach(task => {
                     const listItem = document.createElement('li');
                     listItem.className = 'bg-gray-100 p-6 rounded-xl border border-gray-200 shadow-sm';
+                    const date = new Date(task.created_at).toLocaleDateString();
+                    const time = new Date(task.created_at).toLocaleTimeString();
                     listItem.innerHTML = `
                         <p class="font-semibold text-lg">${task.description}</p>
                         <p class="text-sm text-gray-600 mt-1">
                             <span class="font-bold">Categoría:</span> ${task.eisenhower_category}
                         </p>
-                        <p class="text-xs text-gray-400 mt-2">Guardada el: ${new Date(task.created_at).toLocaleString()}</p>
+                        <p class="text-xs text-gray-400 mt-2">Guardada el: ${date} ${time}</p>
                     `;
                     tasksList.appendChild(listItem);
                 });
 
             } catch (error) {
                 console.error('Error al obtener las tareas:', error);
-                tasksList.innerHTML = `<p class="text-red-600 text-center">Error al cargar el historial.</p>`;
+                tasksList.innerHTML = `<p class="text-red-600 text-center">Error al cargar el historial. ${error.message}</p>`;
             }
         }
 
         async function fetchAndRenderDailyPlans() {
             const plansList = document.getElementById('daily-plans-list');
+            plansList.innerHTML = '<p class="text-gray-500 text-center">Cargando planes...</p>';
             try {
-                const response = await fetch('/api/daily-plans');
+                // Se ajusta la URL para que sea absoluta, evitando el error de "Failed to parse URL"
+                const url = window.location.origin + '/api/daily-plans/';
+                console.log('Llamando a la URL:', url);
+                const response = await fetch(url);
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.error);
+                    throw new Error(data.error || 'Error al obtener el historial.');
                 }
-                
+
                 plansList.innerHTML = ''; // Limpiar la lista actual
                 if (data.daily_plans.length === 0) {
                     plansList.innerHTML = '<p class="text-gray-500 text-center">No tienes planes diarios guardados aún.</p>';
@@ -253,17 +303,19 @@
                 data.daily_plans.forEach(plan => {
                     const listItem = document.createElement('li');
                     listItem.className = 'bg-gray-100 p-6 rounded-xl border border-gray-200 shadow-sm';
+                    const date = new Date(plan.created_at).toLocaleDateString();
+                    const time = new Date(plan.created_at).toLocaleTimeString();
                     listItem.innerHTML = `
                         <p class="font-semibold text-lg">Plan del día:</p>
                         <pre class="text-sm text-gray-600 whitespace-pre-wrap mt-1">${plan.plan_text}</pre>
-                        <p class="text-xs text-gray-400 mt-2">Guardado el: ${new Date(plan.created_at).toLocaleString()}</p>
+                        <p class="text-xs text-gray-400 mt-2">Guardado el: ${date} ${time}</p>
                     `;
                     plansList.appendChild(listItem);
                 });
 
             } catch (error) {
                 console.error('Error al obtener los planes diarios:', error);
-                plansList.innerHTML = `<p class="text-red-600 text-center">Error al cargar el historial.</p>`;
+                plansList.innerHTML = `<p class="text-red-600 text-center">Error al cargar el historial. ${error.message}</p>`;
             }
         }
 
@@ -273,13 +325,11 @@
             fetchAndRenderDailyPlans();
         };
 
-
-        // **FUNCIONES DE ANALISIS ACTUALIZADAS**
+        // **FUNCIONES DE ANALISIS SIN CAMBIOS**
         async function analyzeEisenhower() {
             const input = document.getElementById('eisenhower-input').value;
-            // No recargamos la página, solo actualizamos la lista
             await callBackendApi('eisenhower', { task: input }, 'eisenhower-result');
-            fetchAndRenderTasks(); // Llama a la nueva función
+            fetchAndRenderTasks();
         }
 
         async function analyzeLaborit() {
@@ -289,10 +339,10 @@
 
         async function analyzeYerkesDodson() {
             const input = document.getElementById('yerkes-dodson-input').value;
-            // No recargamos la página, solo actualizamos la lista
             await callBackendApi('yerkes-dodson', { plan: input }, 'yerkes-dodson-result');
-            fetchAndRenderDailyPlans(); // Llama a la nueva función
+            fetchAndRenderDailyPlans();
         }
     </script>
 </body>
+
 </html>

@@ -8,7 +8,10 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     
     # Endpoints de la API, ahora protegidos
-    path('api/eisenhower', views.analyze_eisenhower, name='analyze_eisenhower'),
-    path('api/laborit', views.analyze_laborit, name='analyze_laborit'),
-    path('api/yerkes-dodson', views.analyze_yerkes_dodson, name='analyze_yerkes_dodson'),
+    path('api/tasks/', views.get_tasks_history, name='get_tasks_history'),
+    path('api/daily-plans/', views.get_daily_plans_history, name='get_daily_plans_history'),
+    path('api/eisenhower/', views.analyze_eisenhower, name='analyze_eisenhower'),
+    path('api/laborit/', views.analyze_laborit, name='analyze_laborit'),
+    path('api/yerkes-dodson/', views.analyze_yerkes_dodson, name='analyze_yerkes_dodson'),
 ]
+

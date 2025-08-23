@@ -30,13 +30,7 @@ def index(request):
     Ruta principal que renderiza el archivo index.html.
     Ahora solo es accesible para usuarios logueados.
     """
-    tasks = Task.objects.filter(user=request.user).order_by('-created_at')
-    daily_plans = DailyPlan.objects.filter(user=request.user).order_by('-created_at')
-    context = {
-        'tasks': tasks,
-        'daily_plans': daily_plans
-    }
-    return render(request, 'index.html', context)
+    return render(request, 'index.html')
 
 def signup_view(request):
     """Vista para el registro de nuevos usuarios."""
@@ -70,6 +64,25 @@ def logout_view(request):
     if request.method == 'POST':
         logout(request)
         return redirect('login') # Redirige a la página de inicio de sesión
+
+# **NUEVAS VISTAS DE API PARA EL HISTORIAL**
+@login_required
+@csrf_exempt
+def get_tasks_history(request):
+    """Endpoint de Django para obtener el historial de tareas como JSON."""
+    if request.method == 'GET':
+        tasks = list(Task.objects.filter(user=request.user).order_by('-created_at').values('description', 'eisenhower_category', 'created_at'))
+        return JsonResponse({"tasks": tasks})
+    return JsonResponse({"error": "Método no permitido."}, status=405)
+
+@login_required
+@csrf_exempt
+def get_daily_plans_history(request):
+    """Endpoint de Django para obtener el historial de planes diarios como JSON."""
+    if request.method == 'GET':
+        daily_plans = list(DailyPlan.objects.filter(user=request.user).order_by('-created_at').values('plan_text', 'created_at'))
+        return JsonResponse({"daily_plans": daily_plans})
+    return JsonResponse({"error": "Método no permitido."}, status=405)
 
 @login_required
 @csrf_exempt
