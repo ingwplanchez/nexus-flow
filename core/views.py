@@ -6,11 +6,11 @@ from dotenv import load_dotenv
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 
-from .models import Task, DailyPlan # Importamos los modelos
+from .models import Task, DailyPlan
 
 # Carga las variables de entorno para la clave de API
 load_dotenv()
@@ -24,15 +24,11 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash')
 
-@login_required
 def index(request):
-    """
-    Ruta principal que renderiza el archivo index.html.
-    Ahora solo es accesible para usuarios logueados.
-    """
+    """Ruta principal que renderiza el archivo index.html."""
     return render(request, 'index.html')
 
-def signup_view(request):
+def signup(request):
     """Vista para el registro de nuevos usuarios."""
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
@@ -42,52 +38,15 @@ def signup_view(request):
             return redirect('index')  # Redirige a la página principal después del registro
     else:
         form = UserCreationForm()
-    return render(request, 'auth/signup.html', {'form': form})
+    return render(request, 'signup.html', {'form': form})
 
-def login_view(request):
-    """Vista para el inicio de sesión de usuarios."""
-    if request.method == 'POST':
-        form = AuthenticationForm(data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect('index') # Redirige a la página principal
-    else:
-        form = AuthenticationForm()
-    return render(request, 'auth/login.html', {'form': form})
-
-def logout_view(request):
-    """Vista para cerrar la sesión del usuario."""
-    if request.method == 'POST':
-        logout(request)
-        return redirect('login') # Redirige a la página de inicio de sesión
-
-# **NUEVAS VISTAS DE API PARA EL HISTORIAL**
-@login_required
 @csrf_exempt
-def get_tasks_history(request):
-    """Endpoint de Django para obtener el historial de tareas como JSON."""
-    if request.method == 'GET':
-        tasks = list(Task.objects.filter(user=request.user).order_by('-created_at').values('description', 'eisenhower_category', 'created_at'))
-        return JsonResponse({"tasks": tasks})
-    return JsonResponse({"error": "Método no permitido."}, status=405)
-
 @login_required
-@csrf_exempt
-def get_daily_plans_history(request):
-    """Endpoint de Django para obtener el historial de planes diarios como JSON."""
-    if request.method == 'GET':
-        daily_plans = list(DailyPlan.objects.filter(user=request.user).order_by('-created_at').values('plan_text', 'created_at'))
-        return JsonResponse({"daily_plans": daily_plans})
-    return JsonResponse({"error": "Método no permitido."}, status=405)
-
-@login_required
-@csrf_exempt
 def analyze_eisenhower(request):
-    """Endpoint para la Matriz de Eisenhower. Ahora guarda la tarea."""
+    """
+    Endpoint para la Matriz de Eisenhower.
+    Analiza y guarda la tarea en la base de datos.
+    """
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -107,31 +66,31 @@ def analyze_eisenhower(request):
             Tarea: "{task_description}"
 
             Da tu respuesta en el siguiente formato, sin explicaciones adicionales:
-            - Tarea sugerida: [La tarea elegida]
+            - Tarea: [La tarea elegida]
             - Categoría: [La categoría elegida]
             - Justificación: [Una breve explicación]
+
             """
             response = model.generate_content(prompt)
-            result_text = response.text
+            
+            # Extraer la categoría de la respuesta del modelo
+            category_line = next((line for line in response.text.split('\n') if 'Categoría:' in line), None)
+            eisenhower_category = category_line.split(':')[-1].strip() if category_line else "Sin categoría"
 
-            # Extraemos la categoría del resultado de la IA
-            category_line = next((line for line in result_text.splitlines() if line.startswith('- Categoría:')), None)
-            category = category_line.split(':')[1].strip() if category_line else "No especificada"
-
-            # Creamos y guardamos la tarea en la base de datos
+            # Guarda la tarea en la base de datos
             Task.objects.create(
                 user=request.user,
                 description=task_description,
-                eisenhower_category=category
+                eisenhower_category=eisenhower_category
             )
-            
-            return JsonResponse({"result": result_text})
+
+            return JsonResponse({"result": response.text})
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "Método no permitido."}, status=405)
 
-@login_required
 @csrf_exempt
+@login_required
 def analyze_laborit(request):
     """Endpoint para la Ley de Laborit."""
     if request.method == 'POST':
@@ -161,10 +120,13 @@ def analyze_laborit(request):
             return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "Método no permitido."}, status=405)
 
-@login_required
 @csrf_exempt
+@login_required
 def analyze_yerkes_dodson(request):
-    """Endpoint para la Ley de Yerkes-Dodson. Ahora guarda el plan."""
+    """
+    Endpoint para la Ley de Yerkes-Dodson.
+    Analiza y guarda el plan en la base de datos.
+    """
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -187,15 +149,50 @@ def analyze_yerkes_dodson(request):
             - Sugerencia (Yerkes-Dodson e Illich): [El plan ajustado con la lista de tareas]
             """
             response = model.generate_content(prompt)
-            result_text = response.text
-
-            # Guardamos el plan en la base de datos
+            
+            # Guarda el plan en la base de datos
             DailyPlan.objects.create(
                 user=request.user,
                 plan_text=daily_plan
             )
             
-            return JsonResponse({"result": result_text})
+            return JsonResponse({"result": response.text})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    return JsonResponse({"error": "Método no permitido."}, status=405)
+
+@login_required
+def tasks_view(request):
+    """
+    Vista para obtener el historial de tareas del usuario autenticado.
+    """
+    if request.method == 'GET':
+        try:
+            # Obtiene todas las tareas del usuario actual y las ordena por fecha de creación
+            tasks = Task.objects.filter(user=request.user).order_by('-created_at')
+            
+            # Convierte los objetos de Django a un formato JSON
+            tasks_list = list(tasks.values('description', 'eisenhower_category', 'created_at'))
+            
+            return JsonResponse({"tasks": tasks_list})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    return JsonResponse({"error": "Método no permitido."}, status=405)
+
+@login_required
+def daily_plans_view(request):
+    """
+    Vista para obtener el historial de planes diarios del usuario autenticado.
+    """
+    if request.method == 'GET':
+        try:
+            # Obtiene todos los planes del usuario actual y los ordena por fecha de creación
+            daily_plans = DailyPlan.objects.filter(user=request.user).order_by('-created_at')
+            
+            # Convierte los objetos de Django a un formato JSON
+            plans_list = list(daily_plans.values('plan_text', 'created_at'))
+            
+            return JsonResponse({"daily_plans": plans_list})
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "Método no permitido."}, status=405)

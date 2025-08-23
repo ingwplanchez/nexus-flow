@@ -1,198 +1,110 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nexus Flow</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome para iconos -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap');
-
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
         }
-
         .container {
             max-width: 960px;
         }
-
         .input-group textarea {
             min-height: 120px;
         }
-
-        .section-card {
-            background-color: #f9fafb;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 15px rgba(0, 0, 0, 0.1);
-            padding: 2.5rem;
-            border: 1px solid #e5e7eb;
-            transition: transform 0.3s ease;
-        }
-
-        .section-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .button-primary {
-            background-image: linear-gradient(to right, var(--tw-gradient-stops));
-            transition: all 0.3s ease;
-        }
-
-        .button-primary:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
-
-        .icon-large {
-            font-size: 2.5rem;
-            margin-right: 1rem;
-            color: #4b5563;
-        }
     </style>
 </head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
 
-<body class="bg-gray-50 flex items-center justify-center min-h-screen p-6 text-gray-800">
-
-    <div class="container mx-auto bg-white rounded-3xl shadow-2xl p-10 space-y-12 border border-gray-200">
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-            <div class="text-left mb-4 md:mb-0">
-                <h1 class="text-4xl font-extrabold text-gray-900">Nexus Flow IA</h1>
-                <p class="text-gray-500 mt-2 text-lg">Hola, usuario</p>
-            </div>
-            <!-- Botón de cerrar sesión solo para contexto, no funcional sin un backend -->
-            <button
-                class="bg-red-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-red-700 transition duration-300 shadow-lg"
-                onclick="location.href='{% url 'logout' %}'">
-                Cerrar Sesión
-            </button>
+    <div class="container mx-auto bg-white rounded-xl shadow-lg p-8 space-y-8 border border-gray-200">
+        <header class="text-center">
+            <h1 class="text-3xl font-bold text-gray-800">Nexus Flow IA</h1>
+            <p class="text-gray-500 mt-2">Interactúa con el modelo de IA para la productividad</p>
         </header>
 
         <!-- Contenedor para la Matriz de Eisenhower -->
-        <div class="section-card">
-            <div class="flex items-center mb-4">
-                <i class="fas fa-bolt icon-large text-purple-600"></i>
-                <h2 class="text-3xl font-bold text-gray-700">Matriz de Eisenhower</h2>
-            </div>
-            <p class="text-gray-500 mb-6">Clasifica tus tareas por importancia y urgencia.</p>
-            <div class="input-group mb-6">
-                <textarea id="eisenhower-input"
-                    class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-purple-200 resize-none"
-                    placeholder="Ej: 'Responder 50 correos electrónicos urgentes.'"></textarea>
-                <button onclick="analyzeEisenhower()"
-                    class="mt-4 w-full text-white font-bold py-3 px-6 rounded-lg shadow-lg button-primary from-purple-500 to-indigo-600">
+        <div class="space-y-4">
+            <h2 class="text-2xl font-semibold text-gray-700">Matriz de Eisenhower</h2>
+            <div class="input-group">
+                <textarea id="eisenhower-input" class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Ej: 'Responder 50 correos electrónicos urgentes.'"></textarea>
+                <button onclick="analyzeEisenhower()" class="mt-4 w-full bg-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-purple-700 transition duration-300 shadow-md">
                     Analizar Tarea
                 </button>
             </div>
-            <div id="eisenhower-result"
-                class="bg-purple-50 p-6 rounded-lg text-gray-700 min-h-[60px] flex items-center text-left border-l-4 border-purple-400">
+            <div id="eisenhower-result" class="bg-gray-100 p-4 rounded-lg text-gray-800 min-h-[60px] flex items-center justify-center text-left">
                 <p>El resultado aparecerá aquí...</p>
             </div>
         </div>
 
-        <hr class="border-t-2 border-gray-200">
-
-        <!-- Lista de Tareas Guardadas -->
-        <div class="space-y-6">
-            <h2 class="text-2xl font-semibold text-gray-700">Historial de Tareas</h2>
-            <!-- Este contenedor se llenará completamente con JavaScript.
-                 Se eliminan las etiquetas de plantilla de Django para evitar errores. -->
-            <ul id="tasks-list" class="grid md:grid-cols-2 gap-4">
-                <p class="text-gray-500 text-center">Cargando tareas...</p>
-            </ul>
-        </div>
-
-        <hr class="border-t-2 border-gray-200">
+        <hr class="border-t border-gray-200">
 
         <!-- Contenedor para la Ley de Laborit -->
-        <div class="section-card">
-            <div class="flex items-center mb-4">
-                <i class="fas fa-bullseye icon-large text-green-600"></i>
-                <h2 class="text-3xl font-bold text-gray-700">Ley de Laborit y Pareto</h2>
-            </div>
-            <p class="text-gray-500 mb-6">Identifica la tarea más importante para empezar tu día.</p>
-            <div class="input-group mb-6">
-                <textarea id="laborit-input"
-                    class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-green-200 resize-none"
-                    placeholder="Ej:
+        <div class="space-y-4">
+            <h2 class="text-2xl font-semibold text-gray-700">Ley de Laborit y Pareto</h2>
+            <div class="input-group">
+                <textarea id="laborit-input" class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Ej:
 - Escribir informe (2 horas)
 - Responder emails (30 min)
 - Llamada con cliente (1 hora)"></textarea>
-                <button onclick="analyzeLaborit()"
-                    class="mt-4 w-full text-white font-bold py-3 px-6 rounded-lg shadow-lg button-primary from-green-500 to-teal-600">
+                <button onclick="analyzeLaborit()" class="mt-4 w-full bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition duration-300 shadow-md">
                     Analizar Lista
                 </button>
             </div>
-            <div id="laborit-result"
-                class="bg-green-50 p-6 rounded-lg text-gray-700 min-h-[60px] flex items-center text-left border-l-4 border-green-400">
+            <div id="laborit-result" class="bg-gray-100 p-4 rounded-lg text-gray-800 min-h-[60px] flex items-center justify-center text-left">
                 <p>El resultado aparecerá aquí...</p>
             </div>
         </div>
 
-        <hr class="border-t-2 border-gray-200">
+        <hr class="border-t border-gray-200">
 
         <!-- Contenedor para la Ley de Yerkes-Dodson -->
-        <div class="section-card">
-            <div class="flex items-center mb-4">
-                <i class="fas fa-chart-line icon-large text-blue-600"></i>
-                <h2 class="text-3xl font-bold text-gray-700">Ley de Yerkes-Dodson e Illich</h2>
-            </div>
-            <p class="text-gray-500 mb-6">Optimiza tu plan de trabajo para evitar el agotamiento.</p>
-            <div class="input-group mb-6">
-                <textarea id="yerkes-dodson-input"
-                    class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-200 resize-none"
-                    placeholder="Ej:
+        <div class="space-y-4">
+            <h2 class="text-2xl font-semibold text-gray-700">Ley de Yerkes-Dodson e Illich</h2>
+            <div class="input-group">
+                <textarea id="yerkes-dodson-input" class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Ej:
 - 9 AM - 1 PM: Codificar
 - 1 PM - 2 PM: Almuerzo
 - 2 PM - 6 PM: Continuar codificando"></textarea>
-                <button onclick="analyzeYerkesDodson()"
-                    class="mt-4 w-full text-white font-bold py-3 px-6 rounded-lg shadow-lg button-primary from-blue-500 to-cyan-600">
+                <button onclick="analyzeYerkesDodson()" class="mt-4 w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md">
                     Analizar Plan Diario
                 </button>
             </div>
-            <div id="yerkes-dodson-result"
-                class="bg-blue-50 p-6 rounded-lg text-gray-700 min-h-[60px] flex items-center text-left border-l-4 border-blue-400">
+            <div id="yerkes-dodson-result" class="bg-gray-100 p-4 rounded-lg text-gray-800 min-h-[60px] flex items-center justify-center text-left">
                 <p>El resultado aparecerá aquí...</p>
             </div>
         </div>
 
-        <hr class="border-t-2 border-gray-200">
-
-        <!-- Lista de Planes Diarios Guardados -->
-        <div class="space-y-6">
-            <h2 class="text-2xl font-semibold text-gray-700">Historial de Planes Diarios</h2>
-            <!-- Este contenedor se llenará completamente con JavaScript.
-                 Se eliminan las etiquetas de plantilla de Django para evitar errores. -->
-            <ul id="daily-plans-list" class="grid md:grid-cols-2 gap-4">
-                <p class="text-gray-500 text-center">Cargando planes...</p>
-            </ul>
+        <!-- Contenedor para el historial -->
+        <hr class="border-t border-gray-200">
+        <div class="space-y-4">
+            <h2 class="text-2xl font-semibold text-gray-700">Historial</h2>
+            <button onclick="fetchHistory()" class="w-full bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition duration-300 shadow-md">
+                Ver Historial de Tareas y Planes
+            </button>
+            <div id="history-result" class="bg-gray-100 p-4 rounded-lg text-gray-800 min-h-[60px] text-left">
+                <p>El historial aparecerá aquí...</p>
+            </div>
         </div>
     </div>
 
     <script>
-        // Función para mostrar un indicador de carga
+        // Función para mostrar un mensaje de carga
         function showLoading(elementId) {
-            const resultDiv = document.getElementById(elementId);
-            resultDiv.innerHTML = '<div class="flex items-center justify-center text-gray-500"><svg class="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Cargando...</div>';
+            document.getElementById(elementId).innerHTML = '<div class="flex items-center justify-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Cargando...</div>';
         }
 
-        // Función general para llamar a la API del backend
-        async function callBackendApi(endpoint, data, resultDivId) {
-            const resultDiv = document.getElementById(resultDivId);
-            showLoading(resultDivId);
-
+        // Función genérica para enviar la solicitud al servidor de backend local
+        async function callBackendApi(endpoint, data) {
             try {
-                // Se ajusta la URL para que sea absoluta, evitando el error de "Failed to parse URL"
-                const url = window.location.origin + `/api/${endpoint}/`;
-                console.log('Llamando a la URL:', url);
-                const response = await fetch(url, {
+                const response = await fetch(`/api/${endpoint}`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(data)
                 });
@@ -203,146 +115,79 @@
                 }
 
                 const result = await response.json();
-                resultDiv.innerHTML = `<pre class="whitespace-pre-wrap">${result.result}</pre>`;
-                resultDiv.classList.remove('bg-red-50');
-                if (resultDivId.includes('eisenhower')) {
-                    resultDiv.classList.add('bg-purple-50');
-                } else if (resultDivId.includes('laborit')) {
-                    resultDiv.classList.add('bg-green-50');
-                } else {
-                    resultDiv.classList.add('bg-blue-50');
-                }
                 return result.result;
-
             } catch (error) {
                 console.error('Error al llamar al servidor de backend:', error);
-                resultDiv.innerHTML = `<p class="text-red-600">Ocurrió un error al procesar tu solicitud: ${error.message}</p>`;
-                resultDiv.classList.remove('bg-purple-50', 'bg-green-50', 'bg-blue-50');
-                resultDiv.classList.add('bg-red-50');
+                return `Ocurrió un error al procesar tu solicitud: ${error.message}`;
             }
         }
 
-        // Función para obtener el token CSRF de las cookies, necesario para Django
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.startsWith(name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-
-        // **NUEVAS FUNCIONES PARA CARGAR EL HISTORIAL DESDE EL BACKEND**
-        async function fetchAndRenderTasks() {
-            const tasksList = document.getElementById('tasks-list');
-            tasksList.innerHTML = '<p class="text-gray-500 text-center">Cargando tareas...</p>';
-            try {
-                // Se ajusta la URL para que sea absoluta, evitando el error de "Failed to parse URL"
-                const url = window.location.origin + '/api/tasks/';
-                console.log('Llamando a la URL:', url);
-                const response = await fetch(url);
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Error al obtener el historial.');
-                }
-
-                tasksList.innerHTML = ''; // Limpiar la lista actual
-                if (data.tasks.length === 0) {
-                    tasksList.innerHTML = '<p class="text-gray-500 text-center">No tienes tareas guardadas aún.</p>';
-                    return;
-                }
-
-                data.tasks.forEach(task => {
-                    const listItem = document.createElement('li');
-                    listItem.className = 'bg-gray-100 p-6 rounded-xl border border-gray-200 shadow-sm';
-                    const date = new Date(task.created_at).toLocaleDateString();
-                    const time = new Date(task.created_at).toLocaleTimeString();
-                    listItem.innerHTML = `
-                        <p class="font-semibold text-lg">${task.description}</p>
-                        <p class="text-sm text-gray-600 mt-1">
-                            <span class="font-bold">Categoría:</span> ${task.eisenhower_category}
-                        </p>
-                        <p class="text-xs text-gray-400 mt-2">Guardada el: ${date} ${time}</p>
-                    `;
-                    tasksList.appendChild(listItem);
-                });
-
-            } catch (error) {
-                console.error('Error al obtener las tareas:', error);
-                tasksList.innerHTML = `<p class="text-red-600 text-center">Error al cargar el historial. ${error.message}</p>`;
-            }
-        }
-
-        async function fetchAndRenderDailyPlans() {
-            const plansList = document.getElementById('daily-plans-list');
-            plansList.innerHTML = '<p class="text-gray-500 text-center">Cargando planes...</p>';
-            try {
-                // Se ajusta la URL para que sea absoluta, evitando el error de "Failed to parse URL"
-                const url = window.location.origin + '/api/daily-plans/';
-                console.log('Llamando a la URL:', url);
-                const response = await fetch(url);
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Error al obtener el historial.');
-                }
-
-                plansList.innerHTML = ''; // Limpiar la lista actual
-                if (data.daily_plans.length === 0) {
-                    plansList.innerHTML = '<p class="text-gray-500 text-center">No tienes planes diarios guardados aún.</p>';
-                    return;
-                }
-
-                data.daily_plans.forEach(plan => {
-                    const listItem = document.createElement('li');
-                    listItem.className = 'bg-gray-100 p-6 rounded-xl border border-gray-200 shadow-sm';
-                    const date = new Date(plan.created_at).toLocaleDateString();
-                    const time = new Date(plan.created_at).toLocaleTimeString();
-                    listItem.innerHTML = `
-                        <p class="font-semibold text-lg">Plan del día:</p>
-                        <pre class="text-sm text-gray-600 whitespace-pre-wrap mt-1">${plan.plan_text}</pre>
-                        <p class="text-xs text-gray-400 mt-2">Guardado el: ${date} ${time}</p>
-                    `;
-                    plansList.appendChild(listItem);
-                });
-
-            } catch (error) {
-                console.error('Error al obtener los planes diarios:', error);
-                plansList.innerHTML = `<p class="text-red-600 text-center">Error al cargar el historial. ${error.message}</p>`;
-            }
-        }
-
-        // Llamar a las funciones de renderizado al cargar la página
-        window.onload = () => {
-            fetchAndRenderTasks();
-            fetchAndRenderDailyPlans();
-        };
-
-        // **FUNCIONES DE ANALISIS SIN CAMBIOS**
+        // Función para el botón de la Matriz de Eisenhower
         async function analyzeEisenhower() {
             const input = document.getElementById('eisenhower-input').value;
-            await callBackendApi('eisenhower', { task: input }, 'eisenhower-result');
-            fetchAndRenderTasks();
+            const resultDiv = document.getElementById('eisenhower-result');
+            showLoading('eisenhower-result');
+            
+            const response = await callBackendApi('eisenhower/', { task: input });
+            resultDiv.innerHTML = `<pre class="whitespace-pre-wrap">${response}</pre>`;
         }
 
+        // Función para el botón de la Ley de Laborit
         async function analyzeLaborit() {
             const input = document.getElementById('laborit-input').value;
-            await callBackendApi('laborit', { tasks: input }, 'laborit-result');
+            const resultDiv = document.getElementById('laborit-result');
+            showLoading('laborit-result');
+            
+            const response = await callBackendApi('laborit/', { tasks: input });
+            resultDiv.innerHTML = `<pre class="whitespace-pre-wrap">${response}</pre>`;
         }
 
+        // Función para el botón de la Ley de Yerkes-Dodson
         async function analyzeYerkesDodson() {
             const input = document.getElementById('yerkes-dodson-input').value;
-            await callBackendApi('yerkes-dodson', { plan: input }, 'yerkes-dodson-result');
-            fetchAndRenderDailyPlans();
+            const resultDiv = document.getElementById('yerkes-dodson-result');
+            showLoading('yerkes-dodson-result');
+
+            const response = await callBackendApi('yerkes-dodson/', { plan: input });
+            resultDiv.innerHTML = `<pre class="whitespace-pre-wrap">${response}</pre>`;
+        }
+        
+        // Nueva función para obtener el historial
+        async function fetchHistory() {
+            const resultDiv = document.getElementById('history-result');
+            showLoading('history-result');
+            
+            try {
+                const tasksResponse = await fetch('/api/tasks/');
+                const plansResponse = await fetch('/api/daily-plans/');
+
+                if (!tasksResponse.ok || !plansResponse.ok) {
+                    throw new Error(`Código de estado: ${tasksResponse.status} / ${plansResponse.status}`);
+                }
+
+                const tasksData = await tasksResponse.json();
+                const plansData = await plansResponse.json();
+
+                let tasksHtml = '<h3>Historial de Tareas:</h3><ul>';
+                tasksData.tasks.forEach(task => {
+                    tasksHtml += `<li>- ${task.description} (${task.eisenhower_category})</li>`;
+                });
+                tasksHtml += '</ul>';
+
+                let plansHtml = '<h3>Historial de Planes Diarios:</h3><ul>';
+                plansData.daily_plans.forEach(plan => {
+                    plansHtml += `<li>- ${plan.plan_text}</li>`;
+                });
+                plansHtml += '</ul>';
+
+                resultDiv.innerHTML = tasksHtml + plansHtml;
+
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="text-red-600">Error al cargar el historial: ${error.message}</p>`;
+                console.error('Error al cargar el historial:', error);
+            }
         }
     </script>
-</body>
 
+</body>
 </html>
