@@ -6,11 +6,13 @@
     <title>Nexus Flow</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Importamos la fuente Inter de Google Fonts */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
             transition: background-color 0.3s ease;
         }
+        
         /* Estilos del modo claro */
         .light body {
             background-color: #f3f4f6;
@@ -58,8 +60,8 @@
             display: none;
         }
         .no-scrollbar {
-            -ms-overflow-style: none; /* IE y Edge */
-            scrollbar-width: none;  /* Firefox */
+            -ms-overflow-style: none;  /* IE y Edge */
+            scrollbar-width: none;     /* Firefox */
         }
     </style>
 </head>
@@ -97,68 +99,84 @@
             <!-- Contenedor de mensajes de estado -->
             <div id="status-message" class="text-center py-3 rounded-lg text-white mb-6 hidden"></div>
             
-            <!-- Contenedor para la Matriz de Eisenhower -->
-            <div class="space-y-4">
-                <h2 class="text-xl sm:text-2xl font-semibold text-primary">Matriz de Eisenhower</h2>
-                <div class="input-group">
-                    <textarea id="eisenhower-input" class="w-full p-4 border border-primary bg-container rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-primary" placeholder="Ej: 'Responder 50 correos electrónicos urgentes.'"></textarea>
-                    <button onclick="analyzeEisenhower()" class="mt-4 w-full bg-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-purple-700 transition duration-300 shadow-md">
-                        Analizar Tarea
-                    </button>
+            <!-- CONTENEDOR DE PESTAÑAS (TABS) -->
+            <div class="mt-8">
+                <!-- Botones de las pestañas -->
+                <div class="flex flex-wrap -mb-px text-sm font-medium text-center border-b border-primary">
+                    <button id="tab-eisenhower" class="inline-block p-4 rounded-t-lg border-b-2 border-transparent text-primary hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 dark:hover:border-gray-600 transition-colors duration-200 focus:outline-none" onclick="openTab('eisenhower-content')">Prioridad</button>
+                    <button id="tab-laborit" class="inline-block p-4 rounded-t-lg border-b-2 border-transparent text-primary hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 dark:hover:border-gray-600 transition-colors duration-200 focus:outline-none" onclick="openTab('laborit-content')">Esfuerzo</button>
+                    <button id="tab-yerkes-dodson" class="inline-block p-4 rounded-t-lg border-b-2 border-transparent text-primary hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 dark:hover:border-gray-600 transition-colors duration-200 focus:outline-none" onclick="openTab('yerkes-dodson-content')">Plan Diario</button>
+                    <!-- <button id="tab-history" class="inline-block p-4 rounded-t-lg border-b-2 border-transparent text-primary hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 dark:hover:border-gray-600 transition-colors duration-200 focus:outline-none" onclick="openTab('history-content')">Historial</button> -->
                 </div>
-                <div id="eisenhower-result" class="bg-secondary p-4 rounded-lg text-primary min-h-[60px] flex items-center justify-center text-left transition-colors duration-300">
-                    <p>El resultado aparecerá aquí...</p>
-                </div>
-            </div>
 
-            <hr class="border-t border-primary my-8 sm:my-10">
+                <!-- Contenido de las pestañas -->
+                <div class="py-4">
+                    <!-- Contenido para la Matriz de Eisenhower -->
+                    <div id="eisenhower-content" class="space-y-4">
+                        <h2 class="text-xl sm:text-2xl font-semibold text-primary">Matriz de Eisenhower</h2>
+                        <div class="input-group">
+                            <textarea id="eisenhower-input" class="w-full p-4 border border-primary bg-container rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-primary" rows="7" placeholder="Coloca una o varias tareas. Prioriza tus actividades según su urgencia e importancia. Ejemplo: 
+                            
+- Terminar el informe del cliente que se entrega hoy." ></textarea>
+                            <button onclick="analyzeEisenhower()" class="mt-4 w-full bg-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-purple-700 transition duration-300 shadow-md">
+                                Analizar Tarea
+                            </button>
+                        </div>
+                        <div id="eisenhower-result" class="bg-secondary p-4 rounded-lg text-primary min-h-[60px] flex items-center justify-center text-left transition-colors duration-300">
+                            <p>El resultado aparecerá aquí...</p>
+                        </div>
+                    </div>
 
-            <!-- Contenedor para la Ley de Laborit -->
-            <div class="space-y-4">
-                <h2 class="text-xl sm:text-2xl font-semibold text-primary">Ley de Laborit y Pareto</h2>
-                <div class="input-group">
-                    <textarea id="laborit-input" class="w-full p-4 border border-primary bg-container rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-primary" placeholder="Ej:
-- Escribir informe (2 horas)
-- Responder emails (30 min)
-- Llamada con cliente (1 hora)"></textarea>
-                    <button onclick="analyzeLaborit()" class="mt-4 w-full bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition duration-300 shadow-md">
-                        Analizar Lista
-                    </button>
-                </div>
-                <div id="laborit-result" class="bg-secondary p-4 rounded-lg text-primary min-h-[60px] flex items-center justify-center text-left transition-colors duration-300">
-                    <p>El resultado aparecerá aquí...</p>
-                </div>
-            </div>
+                    <!-- Contenido para la Ley de Laborit -->
+                    <div id="laborit-content" class="space-y-4 hidden">
+                        <h2 class="text-xl sm:text-2xl font-semibold text-primary">Ley de Laborit</h2>
+                        <div class="input-group">
+                            <textarea id="laborit-input" class="w-full p-4 border border-primary bg-container rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-primary" rows="7" placeholder="Coloca tu lista de tareas. Comienza tu día con la tarea más difícil para evitar la procrastinación. Ejemplo:
 
-            <hr class="border-t border-primary my-8 sm:my-10">
+- Escribir una propuesta de negocio para un cliente clave (4 horas).
+- Enviar un email de seguimiento a un colega (15 min).
+- Preparar el material para una presentación interna (1.5 horas)."></textarea>
+                            <button onclick="analyzeLaborit()" class="mt-4 w-full bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition duration-300 shadow-md">
+                                Analizar Lista
+                            </button>
+                        </div>
+                        <div id="laborit-result" class="bg-secondary p-4 rounded-lg text-primary min-h-[60px] flex items-center justify-center text-left transition-colors duration-300">
+                            <p>El resultado aparecerá aquí...</p>
+                        </div>
+                    </div>
 
-            <!-- Contenedor para la Ley de Yerkes-Dodson -->
-            <div class="space-y-4">
-                <h2 class="text-xl sm:text-2xl font-semibold text-primary">Ley de Yerkes-Dodson e Illich</h2>
-                <div class="input-group">
-                    <textarea id="yerkes-dodson-input" class="w-full p-4 border border-primary bg-container rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-primary" placeholder="Ej:
-- 9 AM - 1 PM: Codificar
-- 1 PM - 2 PM: Almuerzo
-- 2 PM - 6 PM: Continuar codificando"></textarea>
-                    <button onclick="analyzeYerkesDodson()" class="mt-4 w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md">
-                        Analizar Plan Diario
-                    </button>
-                </div>
-                <div id="yerkes-dodson-result" class="bg-secondary p-4 rounded-lg text-primary min-h-[60px] flex items-center justify-center text-left transition-colors duration-300">
-                    <p>El resultado aparecerá aquí...</p>
-                </div>
-            </div>
-            
-            <hr class="border-t border-primary my-8 sm:my-10">
+                    <!-- Contenido para la Ley de Yerkes-Dodson -->
+                    <div id="yerkes-dodson-content" class="space-y-4 hidden">
+                        <h2 class="text-xl sm:text-2xl font-semibold text-primary">Ley de Yerkes-Dodson</h2>
+                        <div class="input-group">
+                            <textarea id="yerkes-dodson-input" class="w-full p-4 border border-primary bg-container rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-primary" rows="7" placeholder="Coloca tu horario. Planifica tus tareas del día y encuentra el rendimiento óptimo. Ejemplo:
 
-            <!-- Contenedor para el historial -->
-            <div class="space-y-4">
-                <h2 class="text-xl sm:text-2xl font-semibold text-primary">Historial</h2>
-                <button onclick="fetchHistory()" class="w-full bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition duration-300 shadow-md">
-                    Ver Historial de Tareas y Planes
-                </button>
-                <div id="history-result" class="bg-secondary p-4 rounded-lg text-primary min-h-[60px] text-left transition-colors duration-300">
-                    <p>El historial aparecerá aquí...</p>
+Lunes:
+8:00 AM - 12:00 PM: Planificar la semana y delegar tareas. 
+12:00 PM - 1:00 PM: Almuerzo. 
+1:00 PM - 3:00 PM: Responder emails y llamadas. 
+3:00 PM - 5:00 PM: Leer un libro técnico."></textarea>
+                            <button onclick="analyzeYerkesDodson()" class="mt-4 w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md">
+                                Analizar Plan Diario
+                            </button>
+                        </div>
+                        <div id="yerkes-dodson-result" class="bg-secondary p-4 rounded-lg text-primary min-h-[60px] flex items-center justify-center text-left transition-colors duration-300">
+                            <p>El resultado aparecerá aquí...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Contenido para el historial -->
+                    <!--
+                    <div id="history-content" class="space-y-4 hidden">
+                        <h2 class="text-xl sm:text-2xl font-semibold text-primary">Historial</h2>
+                        <button onclick="fetchHistory()" class="w-full bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition duration-300 shadow-md">
+                            Ver Historial de Tareas y Planes
+                        </button>
+                        <div id="history-result" class="bg-secondary p-4 rounded-lg text-primary min-h-[60px] text-left transition-colors duration-300">
+                            <p>El historial aparecerá aquí...</p>
+                        </div>
+                    </div>
+                    -->
                 </div>
             </div>
         </div>
@@ -239,7 +257,7 @@
             const response = await callBackendApi('eisenhower', { task: input });
             resultDiv.innerHTML = `<pre class="whitespace-pre-wrap">${response}</pre>`;
             if (response && !response.startsWith('Ocurrió un error')) {
-                 showStatusMessage('Tarea analizada y guardada con éxito.', true);
+                showStatusMessage('Tarea analizada con éxito.', true);
             }
         }
 
@@ -273,7 +291,7 @@
             const response = await callBackendApi('yerkes-dodson', { plan: input });
             resultDiv.innerHTML = `<pre class="whitespace-pre-wrap">${response}</pre>`;
             if (response && !response.startsWith('Ocurrió un error')) {
-                showStatusMessage('Plan diario analizado y guardado con éxito.', true);
+                showStatusMessage('Plan diario analizado con éxito.', true);
             }
         }
         
@@ -356,14 +374,41 @@
             }
         }
 
-        // --- LÓGICA DEL MODO OSCURO ---
+        // LÓGICA DE LAS PESTAÑAS (TABS)
+        function openTab(tabId) {
+            // Oculta todos los contenidos de las pestañas
+            const tabContents = document.querySelectorAll('[id$="-content"]');
+            tabContents.forEach(content => content.classList.add('hidden'));
+
+            // Quita el estilo de "activo" de todos los botones de pestañas
+            const tabButtons = document.querySelectorAll('button[id^="tab-"]');
+            tabButtons.forEach(button => {
+                button.classList.remove('border-purple-500', 'font-bold');
+                button.classList.add('border-transparent');
+            });
+
+            // Muestra el contenido de la pestaña seleccionada
+            const selectedContent = document.getElementById(tabId);
+            if (selectedContent) {
+                selectedContent.classList.remove('hidden');
+            }
+
+            // Agrega el estilo de "activo" al botón de la pestaña seleccionada
+            const selectedButton = document.getElementById('tab-' + tabId.replace('-content', ''));
+            if (selectedButton) {
+                selectedButton.classList.add('border-purple-500', 'font-bold');
+                selectedButton.classList.remove('border-transparent');
+            }
+        }
+
+        // LÓGICA DEL MODO OSCURO
         const themeToggle = document.getElementById('theme-toggle');
         const moonIcon = document.getElementById('moon-icon');
         const sunIcon = document.getElementById('sun-icon');
         
         // Verificar la preferencia de tema del sistema o del localStorage
         const isDarkMode = localStorage.getItem('theme') === 'dark' || 
-                           (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                                (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
         // Establecer la clase inicial y los iconos
         if (isDarkMode) {
@@ -402,6 +447,8 @@
                 csrfInput.value = csrfToken;
                 logoutForm.appendChild(csrfInput);
             }
+            // Abre la primera pestaña por defecto al cargar la página
+            openTab('eisenhower-content');
         });
     </script>
 </body>
