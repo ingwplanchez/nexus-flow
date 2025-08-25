@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,90 +9,192 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease;
+        }
+        /* Estilos del modo claro */
+        .light body {
             background-color: #f3f4f6;
         }
-        .container {
-            max-width: 960px;
+        .light .bg-container {
+            background-color: #fff;
+            border-color: #e5e7eb;
         }
-        .input-group textarea {
-            min-height: 120px;
+        .light .text-primary {
+            color: #1f2937;
+        }
+        .light .text-secondary {
+            color: #6b7280;
+        }
+        .light .bg-secondary {
+            background-color: #f9fafb;
+        }
+        .light .border-primary {
+            border-color: #d1d5db;
+        }
+
+        /* Estilos del modo oscuro */
+        .dark body {
+            background-color: #121212;
+        }
+        .dark .bg-container {
+            background-color: #1f2937;
+            border-color: #374151;
+        }
+        .dark .text-primary {
+            color: #e5e7eb;
+        }
+        .dark .text-secondary {
+            color: #9ca3af;
+        }
+        .dark .bg-secondary {
+            background-color: #374151;
+        }
+        .dark .border-primary {
+            border-color: #4b5563;
+        }
+        
+        /* Ocultar la barra de desplazamiento en los contenedores de historial */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none; /* IE y Edge */
+            scrollbar-width: none;  /* Firefox */
         }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+<body class="transition-colors duration-300">
 
-    <div class="container mx-auto bg-white rounded-xl shadow-lg p-8 space-y-8 border border-gray-200">
-        <header class="text-center">
-            <h1 class="text-3xl font-bold text-gray-800">Nexus Flow IA</h1>
-            <p class="text-gray-500 mt-2">Interactúa con el modelo de IA para la productividad</p>
-        </header>
-
-        <!-- Contenedor para la Matriz de Eisenhower -->
-        <div class="space-y-4">
-            <h2 class="text-2xl font-semibold text-gray-700">Matriz de Eisenhower</h2>
-            <div class="input-group">
-                <textarea id="eisenhower-input" class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Ej: 'Responder 50 correos electrónicos urgentes.'"></textarea>
-                <button onclick="analyzeEisenhower()" class="mt-4 w-full bg-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-purple-700 transition duration-300 shadow-md">
-                    Analizar Tarea
+    <div class="container mx-auto p-4 md:p-8 space-y-8 lg:space-y-12">
+        <!-- Contenedor principal con modo claro/oscuro -->
+        <div class="bg-container rounded-xl shadow-lg p-6 sm:p-8 border border-primary transition-colors duration-300">
+            <!-- Encabezado con el botón de modo oscuro y Cerrar Sesión -->
+            <header class="text-center mb-6 sm:mb-8 flex justify-between items-center">
+                <div class="flex-grow">
+                    <h1 class="text-2xl sm:text-3xl font-bold text-primary">Nexus Flow IA</h1>
+                    <p class="text-sm sm:text-base text-secondary mt-1">Interactúa con el modelo de IA para la productividad</p>
+                </div>
+                <!-- Botón de modo oscuro -->
+                <button id="theme-toggle" class="p-2 rounded-full transition-colors duration-300 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 mr-2">
+                    <svg id="sun-icon" class="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <svg id="moon-icon" class="h-6 w-6 text-gray-400 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
                 </button>
-            </div>
-            <div id="eisenhower-result" class="bg-gray-100 p-4 rounded-lg text-gray-800 min-h-[60px] flex items-center justify-center text-left">
-                <p>El resultado aparecerá aquí...</p>
-            </div>
-        </div>
+                <!-- Botón de Cerrar Sesión -->
+                <form id="logout-form" action="/logout/" method="post" class="inline-block">
+                    <!-- CSRF Token se maneja en Django -->
+                    <button type="submit" class="p-2 rounded-full text-white bg-red-500 hover:bg-red-600 transition-colors duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                    </button>
+                </form>
+            </header>
 
-        <hr class="border-t border-gray-200">
+            <!-- Contenedor de mensajes de estado -->
+            <div id="status-message" class="text-center py-3 rounded-lg text-white mb-6 hidden"></div>
+            
+            <!-- Contenedor para la Matriz de Eisenhower -->
+            <div class="space-y-4">
+                <h2 class="text-xl sm:text-2xl font-semibold text-primary">Matriz de Eisenhower</h2>
+                <div class="input-group">
+                    <textarea id="eisenhower-input" class="w-full p-4 border border-primary bg-container rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-primary" placeholder="Ej: 'Responder 50 correos electrónicos urgentes.'"></textarea>
+                    <button onclick="analyzeEisenhower()" class="mt-4 w-full bg-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-purple-700 transition duration-300 shadow-md">
+                        Analizar Tarea
+                    </button>
+                </div>
+                <div id="eisenhower-result" class="bg-secondary p-4 rounded-lg text-primary min-h-[60px] flex items-center justify-center text-left transition-colors duration-300">
+                    <p>El resultado aparecerá aquí...</p>
+                </div>
+            </div>
 
-        <!-- Contenedor para la Ley de Laborit -->
-        <div class="space-y-4">
-            <h2 class="text-2xl font-semibold text-gray-700">Ley de Laborit y Pareto</h2>
-            <div class="input-group">
-                <textarea id="laborit-input" class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Ej:
+            <hr class="border-t border-primary my-8 sm:my-10">
+
+            <!-- Contenedor para la Ley de Laborit -->
+            <div class="space-y-4">
+                <h2 class="text-xl sm:text-2xl font-semibold text-primary">Ley de Laborit y Pareto</h2>
+                <div class="input-group">
+                    <textarea id="laborit-input" class="w-full p-4 border border-primary bg-container rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-primary" placeholder="Ej:
 - Escribir informe (2 horas)
 - Responder emails (30 min)
 - Llamada con cliente (1 hora)"></textarea>
-                <button onclick="analyzeLaborit()" class="mt-4 w-full bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition duration-300 shadow-md">
-                    Analizar Lista
-                </button>
+                    <button onclick="analyzeLaborit()" class="mt-4 w-full bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition duration-300 shadow-md">
+                        Analizar Lista
+                    </button>
+                </div>
+                <div id="laborit-result" class="bg-secondary p-4 rounded-lg text-primary min-h-[60px] flex items-center justify-center text-left transition-colors duration-300">
+                    <p>El resultado aparecerá aquí...</p>
+                </div>
             </div>
-            <div id="laborit-result" class="bg-gray-100 p-4 rounded-lg text-gray-800 min-h-[60px] flex items-center justify-center text-left">
-                <p>El resultado aparecerá aquí...</p>
-            </div>
-        </div>
 
-        <hr class="border-t border-gray-200">
+            <hr class="border-t border-primary my-8 sm:my-10">
 
-        <!-- Contenedor para la Ley de Yerkes-Dodson -->
-        <div class="space-y-4">
-            <h2 class="text-2xl font-semibold text-gray-700">Ley de Yerkes-Dodson e Illich</h2>
-            <div class="input-group">
-                <textarea id="yerkes-dodson-input" class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Ej:
+            <!-- Contenedor para la Ley de Yerkes-Dodson -->
+            <div class="space-y-4">
+                <h2 class="text-xl sm:text-2xl font-semibold text-primary">Ley de Yerkes-Dodson e Illich</h2>
+                <div class="input-group">
+                    <textarea id="yerkes-dodson-input" class="w-full p-4 border border-primary bg-container rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-primary" placeholder="Ej:
 - 9 AM - 1 PM: Codificar
 - 1 PM - 2 PM: Almuerzo
 - 2 PM - 6 PM: Continuar codificando"></textarea>
-                <button onclick="analyzeYerkesDodson()" class="mt-4 w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md">
-                    Analizar Plan Diario
-                </button>
+                    <button onclick="analyzeYerkesDodson()" class="mt-4 w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md">
+                        Analizar Plan Diario
+                    </button>
+                </div>
+                <div id="yerkes-dodson-result" class="bg-secondary p-4 rounded-lg text-primary min-h-[60px] flex items-center justify-center text-left transition-colors duration-300">
+                    <p>El resultado aparecerá aquí...</p>
+                </div>
             </div>
-            <div id="yerkes-dodson-result" class="bg-gray-100 p-4 rounded-lg text-gray-800 min-h-[60px] flex items-center justify-center text-left">
-                <p>El resultado aparecerá aquí...</p>
-            </div>
-        </div>
+            
+            <hr class="border-t border-primary my-8 sm:my-10">
 
-        <!-- Contenedor para el historial -->
-        <hr class="border-t border-gray-200">
-        <div class="space-y-4">
-            <h2 class="text-2xl font-semibold text-gray-700">Historial</h2>
-            <button onclick="fetchHistory()" class="w-full bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition duration-300 shadow-md">
-                Ver Historial de Tareas y Planes
-            </button>
-            <div id="history-result" class="bg-gray-100 p-4 rounded-lg text-gray-800 min-h-[60px] text-left">
-                <p>El historial aparecerá aquí...</p>
+            <!-- Contenedor para el historial -->
+            <div class="space-y-4">
+                <h2 class="text-xl sm:text-2xl font-semibold text-primary">Historial</h2>
+                <button onclick="fetchHistory()" class="w-full bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition duration-300 shadow-md">
+                    Ver Historial de Tareas y Planes
+                </button>
+                <div id="history-result" class="bg-secondary p-4 rounded-lg text-primary min-h-[60px] text-left transition-colors duration-300">
+                    <p>El historial aparecerá aquí...</p>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        // --- LÓGICA DE LA INTERFAZ Y COMUNICACIÓN CON EL SERVIDOR ---
+
+        // Función para obtener el CSRF Token de las cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Función para mostrar un mensaje de estado (éxito o error)
+        function showStatusMessage(message, isSuccess) {
+            const statusDiv = document.getElementById('status-message');
+            statusDiv.textContent = message;
+            statusDiv.classList.remove('hidden', 'bg-red-500', 'bg-green-500');
+            statusDiv.classList.add(isSuccess ? 'bg-green-500' : 'bg-red-500');
+            statusDiv.style.display = 'block';
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000); // El mensaje desaparece después de 5 segundos
+        }
+
         // Función para mostrar un mensaje de carga
         function showLoading(elementId) {
             document.getElementById(elementId).innerHTML = '<div class="flex items-center justify-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Cargando...</div>';
@@ -101,10 +203,11 @@
         // Función genérica para enviar la solicitud al servidor de backend local
         async function callBackendApi(endpoint, data) {
             try {
-                const response = await fetch(`/api/${endpoint}`, {
+                const response = await fetch(`/api/${endpoint}/`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken') // Añadimos el token CSRF
                     },
                     body: JSON.stringify(data)
                 });
@@ -118,6 +221,7 @@
                 return result.result;
             } catch (error) {
                 console.error('Error al llamar al servidor de backend:', error);
+                showStatusMessage(`Ocurrió un error al procesar tu solicitud: ${error.message}`, false);
                 return `Ocurrió un error al procesar tu solicitud: ${error.message}`;
             }
         }
@@ -125,69 +229,180 @@
         // Función para el botón de la Matriz de Eisenhower
         async function analyzeEisenhower() {
             const input = document.getElementById('eisenhower-input').value;
+            if (!input) {
+                showStatusMessage('Por favor, ingresa una tarea para analizar.', false);
+                return;
+            }
             const resultDiv = document.getElementById('eisenhower-result');
             showLoading('eisenhower-result');
             
-            const response = await callBackendApi('eisenhower/', { task: input });
+            const response = await callBackendApi('eisenhower', { task: input });
             resultDiv.innerHTML = `<pre class="whitespace-pre-wrap">${response}</pre>`;
+            if (response && !response.startsWith('Ocurrió un error')) {
+                 showStatusMessage('Tarea analizada y guardada con éxito.', true);
+            }
         }
 
         // Función para el botón de la Ley de Laborit
         async function analyzeLaborit() {
             const input = document.getElementById('laborit-input').value;
+            if (!input) {
+                showStatusMessage('Por favor, ingresa una lista de tareas para analizar.', false);
+                return;
+            }
             const resultDiv = document.getElementById('laborit-result');
             showLoading('laborit-result');
             
-            const response = await callBackendApi('laborit/', { tasks: input });
+            const response = await callBackendApi('laborit', { tasks: input });
             resultDiv.innerHTML = `<pre class="whitespace-pre-wrap">${response}</pre>`;
+            if (response && !response.startsWith('Ocurrió un error')) {
+                showStatusMessage('Lista de tareas analizada con éxito.', true);
+            }
         }
 
         // Función para el botón de la Ley de Yerkes-Dodson
         async function analyzeYerkesDodson() {
             const input = document.getElementById('yerkes-dodson-input').value;
+            if (!input) {
+                showStatusMessage('Por favor, ingresa un plan diario para analizar.', false);
+                return;
+            }
             const resultDiv = document.getElementById('yerkes-dodson-result');
             showLoading('yerkes-dodson-result');
 
-            const response = await callBackendApi('yerkes-dodson/', { plan: input });
+            const response = await callBackendApi('yerkes-dodson', { plan: input });
             resultDiv.innerHTML = `<pre class="whitespace-pre-wrap">${response}</pre>`;
+            if (response && !response.startsWith('Ocurrió un error')) {
+                showStatusMessage('Plan diario analizado y guardado con éxito.', true);
+            }
         }
         
-        // Nueva función para obtener el historial
+        // Función para obtener y mostrar el historial
         async function fetchHistory() {
             const resultDiv = document.getElementById('history-result');
             showLoading('history-result');
             
             try {
-                const tasksResponse = await fetch('/api/tasks/');
-                const plansResponse = await fetch('/api/daily-plans/');
+                // Hacemos las llamadas a los nuevos endpoints de historial
+                const tasksResponse = await fetch('/api/tasks/history/');
+                const plansResponse = await fetch('/api/daily-plans/history/');
 
                 if (!tasksResponse.ok || !plansResponse.ok) {
-                    throw new Error(`Código de estado: ${tasksResponse.status} / ${plansResponse.status}`);
+                    throw new Error("No se pudo cargar el historial.");
                 }
 
                 const tasksData = await tasksResponse.json();
                 const plansData = await plansResponse.json();
+                
+                // Función para obtener el color de fondo basado en la categoría de Eisenhower
+                const getCategoryColor = (category) => {
+                    const lowerCategory = category.toLowerCase();
+                    if (lowerCategory.includes('urgente') && lowerCategory.includes('importante')) return 'bg-red-400';
+                    if (lowerCategory.includes('urgente') && lowerCategory.includes('no importante')) return 'bg-yellow-400';
+                    if (lowerCategory.includes('no urgente') && lowerCategory.includes('importante')) return 'bg-green-400';
+                    if (lowerCategory.includes('no urgente') && lowerCategory.includes('no importante')) return 'bg-blue-400';
+                    return 'bg-gray-400'; // Color por defecto
+                };
 
-                let tasksHtml = '<h3>Historial de Tareas:</h3><ul>';
-                tasksData.tasks.forEach(task => {
-                    tasksHtml += `<li>- ${task.description} (${task.eisenhower_category})</li>`;
-                });
-                tasksHtml += '</ul>';
+                let historyHtml = '<div class="space-y-8">';
+                
+                // Generar HTML para las tarjetas de tareas
+                if (tasksData.tasks && tasksData.tasks.length > 0) {
+                    historyHtml += '<h3 class="text-xl font-semibold text-primary">Historial de Tareas</h3>';
+                    historyHtml += '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">';
+                    tasksData.tasks.forEach(task => {
+                        const date = new Date(task.created_at).toLocaleDateString();
+                        const time = new Date(task.created_at).toLocaleTimeString();
+                        const color = getCategoryColor(task.eisenhower_category);
+                        historyHtml += `
+                            <div class="p-4 rounded-lg shadow-md border-2 border-transparent hover:border-blue-500 transition-all duration-300 ${color} text-white">
+                                <p class="font-bold mb-1">${task.description}</p>
+                                <p class="text-sm">Categoría: ${task.eisenhower_category}</p>
+                                <p class="text-xs text-right mt-2">${date} ${time}</p>
+                            </div>
+                        `;
+                    });
+                    historyHtml += '</div>';
+                } else {
+                    historyHtml += `<p class="text-secondary text-center">No hay tareas guardadas.</p>`;
+                }
 
-                let plansHtml = '<h3>Historial de Planes Diarios:</h3><ul>';
-                plansData.daily_plans.forEach(plan => {
-                    plansHtml += `<li>- ${plan.plan_text}</li>`;
-                });
-                plansHtml += '</ul>';
+                // Generar HTML para las tarjetas de planes diarios
+                if (plansData.daily_plans && plansData.daily_plans.length > 0) {
+                    historyHtml += `<h3 class="text-xl font-semibold text-primary mt-8">Historial de Planes Diarios</h3>`;
+                    historyHtml += '<div class="grid grid-cols-1 gap-4">';
+                    plansData.daily_plans.forEach(plan => {
+                        const date = new Date(plan.created_at).toLocaleDateString();
+                        const time = new Date(plan.created_at).toLocaleTimeString();
+                        historyHtml += `
+                            <div class="p-4 rounded-lg shadow-md border-2 border-transparent hover:border-blue-500 transition-all duration-300 bg-gray-500 dark:bg-gray-700 text-white">
+                                <p class="font-bold mb-1">Plan del día:</p>
+                                <p class="text-sm whitespace-pre-wrap">${plan.plan_text}</p>
+                                <p class="text-xs text-right mt-2">${date} ${time}</p>
+                            </div>
+                        `;
+                    });
+                    historyHtml += '</div>';
+                } else {
+                    historyHtml += `<p class="text-secondary text-center">No hay planes guardados.</p>`;
+                }
 
-                resultDiv.innerHTML = tasksHtml + plansHtml;
+                historyHtml += '</div>';
+                resultDiv.innerHTML = historyHtml;
 
             } catch (error) {
                 resultDiv.innerHTML = `<p class="text-red-600">Error al cargar el historial: ${error.message}</p>`;
                 console.error('Error al cargar el historial:', error);
             }
         }
-    </script>
 
+        // --- LÓGICA DEL MODO OSCURO ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const moonIcon = document.getElementById('moon-icon');
+        const sunIcon = document.getElementById('sun-icon');
+        
+        // Verificar la preferencia de tema del sistema o del localStorage
+        const isDarkMode = localStorage.getItem('theme') === 'dark' || 
+                           (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+        // Establecer la clase inicial y los iconos
+        if (isDarkMode) {
+            document.documentElement.classList.add('dark');
+            moonIcon.classList.remove('hidden');
+            sunIcon.classList.add('hidden');
+        } else {
+            document.documentElement.classList.remove('dark');
+            sunIcon.classList.remove('hidden');
+            moonIcon.classList.add('hidden');
+        }
+
+        // Manejar el clic en el botón de alternar tema
+        themeToggle.addEventListener('click', () => {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                moonIcon.classList.remove('hidden');
+                sunIcon.classList.add('hidden');
+            }
+        });
+
+        // Configurar el formulario de logout para enviar el token CSRF
+        document.addEventListener('DOMContentLoaded', () => {
+            const logoutForm = document.getElementById('logout-form');
+            if (logoutForm) {
+                const csrfToken = getCookie('csrftoken');
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrfmiddlewaretoken';
+                csrfInput.value = csrfToken;
+                logoutForm.appendChild(csrfInput);
+            }
+        });
+    </script>
 </body>
 </html>
