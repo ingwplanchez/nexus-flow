@@ -56,14 +56,25 @@
                 <!-- Contenido de las pestañas -->
                 <div class="py-4">
                     <!-- CONTENIDO PARA LA LISTA DE TAREAS - ¡Ahora es el primero! -->
+                     
                     <div id="todo-list-content" class="space-y-4">
-                        <h2 class="text-xl sm:text-2xl font-semibold text-primary">Lista de Tareas</h2>
+                        
+                        <!-- <h2 class="text-xl sm:text-2xl font-semibold text-primary">Lista de Tareas</h2> -->
+
+                        <div class="flex justify-start space-x-4 mb-4">
+                            <button onclick="setFilter('all')" class="px-4 py-2 rounded-lg text-primary bg-secondary hover:bg-teal-500 transition-colors duration-300">Todas</button>
+                            <button onclick="setFilter('active')" class="px-4 py-2 rounded-lg text-primary bg-secondary hover:bg-teal-500 transition-colors duration-300">Pendientes</button>
+                            <button onclick="setFilter('completed')" class="px-4 py-2 rounded-lg text-primary bg-secondary hover:bg-teal-500 transition-colors duration-300">Completadas</button>
+                        </div>
+
                         <div class="flex flex-col sm:flex-row gap-2">
                             <input id="new-task-input" type="text" placeholder="Agrega una nueva tarea..." class="flex-grow p-4 border border-primary bg-container rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-primary">
                             <button onclick="addTask()" class="mt-2 sm:mt-0 px-6 py-3 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-700 transition duration-300 shadow-md">
                                 Agregar Tarea
                             </button>
                         </div>
+
+                        
                         <ul id="todo-list" class="space-y-2 draggable-list" ondragover="allowDrop(event)">
                             <!-- Las tareas se renderizarán aquí -->
                         </ul>

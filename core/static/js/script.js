@@ -127,17 +127,34 @@ function saveTasks(tasks) {
 let draggedItem = null;
 
 // Renderiza las tareas en el DOM con soporte para arrastrar y soltar
+// Agrega una nueva variable global para el filtro actual
+let currentFilter = 'all'; // Puede ser 'all', 'completed' o 'active'
+
+// Actualiza la función renderTasks para que filtre la lista antes de renderizarla
 function renderTasks() {
     const todoList = document.getElementById('todo-list');
     const tasks = getTasks();
     todoList.innerHTML = ''; // Limpia la lista actual
     
-    if (tasks.length === 0) {
-        todoList.innerHTML = '<p class="text-secondary text-center">No tienes tareas pendientes. ¡Hora de agregar una!</p>';
+    // Filtramos las tareas según el filtro actual
+    let filteredTasks = tasks;
+    if (currentFilter === 'completed') {
+        filteredTasks = tasks.filter(task => task.completed);
+    } else if (currentFilter === 'active') {
+        filteredTasks = tasks.filter(task => !task.completed);
+    }
+
+    if (filteredTasks.length === 0) {
+        todoList.innerHTML = '<p class="text-secondary text-center">No hay tareas en esta vista.</p>';
         return;
     }
 
-    tasks.forEach((task, index) => {
+    filteredTasks.forEach((task, index) => {
+        // En lugar de usar el índice del arreglo filtrado,
+        // necesitamos el índice del arreglo original para las funciones
+        // de edición y eliminación. Para esto, buscamos el índice original.
+        const originalIndex = tasks.findIndex(t => t.text === task.text && t.completed === task.completed);
+
         const li = document.createElement('li');
         li.className = `p-4 rounded-lg shadow flex items-center justify-between ${task.completed ? 'bg-gray-400 dark:bg-gray-600' : 'bg-secondary'} transition-colors duration-300`;
         li.classList.add('todo-item');
@@ -145,26 +162,24 @@ function renderTasks() {
             li.classList.add('completed');
         }
 
-        // Hacemos que cada tarea sea arrastrable
         li.draggable = true;
-        li.dataset.index = index; // Almacenamos el índice en un atributo de datos
+        li.dataset.index = originalIndex;
 
-        // Usamos un span para el texto de la tarea y un input para la edición
         li.innerHTML = `
             <div class="flex items-center flex-grow">
-                <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${index})" class="h-5 w-5 rounded text-teal-600 border-gray-300 focus:ring-teal-500">
-                <span id="task-text-${index}" class="ml-4 text-primary task-text flex-grow">${task.text}</span>
-                <input id="task-input-${index}" type="text" value="${task.text}" class="hidden flex-grow p-2 ml-4 rounded-lg border border-teal-500 bg-container text-primary focus:outline-none">
+                <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${originalIndex})" class="h-5 w-5 rounded text-teal-600 border-gray-300 focus:ring-teal-500">
+                <span id="task-text-${originalIndex}" class="ml-4 text-primary task-text flex-grow">${task.text}</span>
+                <input id="task-input-${originalIndex}" type="text" value="${task.text}" class="hidden flex-grow p-2 ml-4 rounded-lg border border-teal-500 bg-container text-primary focus:outline-none">
             </div>
             <div class="flex items-center space-x-2 ml-2">
                 <!-- Botón de edición/guardado -->
-                <button id="edit-btn-${index}" onclick="toggleEditMode(${index})" class="text-gray-500 hover:text-teal-500 transition-colors duration-200">
+                <button id="edit-btn-${originalIndex}" onclick="toggleEditMode(${originalIndex})" class="text-gray-500 hover:text-teal-500 transition-colors duration-200">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232a2.5 2.5 0 013.536 3.536L6.5 21.036H3v-3.536l12.232-12.232zM15.232 5.232L18.768 8.768" />
                     </svg>
                 </button>
                 <!-- Botón de eliminación -->
-                <button onclick="deleteTask(${index})" class="text-red-500 hover:text-red-700 transition-colors duration-200">
+                <button onclick="deleteTask(${originalIndex})" class="text-red-500 hover:text-red-700 transition-colors duration-200">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -174,9 +189,16 @@ function renderTasks() {
         todoList.appendChild(li);
     });
 
-    // ¡La solución! Vuelve a asignar los "event listeners" de arrastrar y soltar
     addDragAndDropListeners();
 }
+
+// Nueva función para cambiar el filtro
+function setFilter(filter) {
+    currentFilter = filter;
+    renderTasks();
+    //showStatusMessage(`Mostrando tareas: ${filter}`, true);
+}
+
 
 /**
  * Añade los manejadores de eventos para arrastrar y soltar a todos los elementos de la lista.
