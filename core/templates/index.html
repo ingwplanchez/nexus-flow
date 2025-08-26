@@ -61,7 +61,7 @@
         }
         .no-scrollbar {
             -ms-overflow-style: none;  /* IE y Edge */
-            scrollbar-width: none;     /* Firefox */
+            scrollbar-width: none;      /* Firefox */
         }
 
         /* Estilos para los elementos de la lista de tareas */
@@ -339,16 +339,27 @@ Lunes:
                     li.classList.add('completed');
                 }
 
+                // Usamos un span para el texto de la tarea y un input para la edición
                 li.innerHTML = `
                     <div class="flex items-center flex-grow">
                         <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${index})" class="h-5 w-5 rounded text-teal-600 border-gray-300 focus:ring-teal-500">
-                        <span class="ml-4 text-primary task-text">${task.text}</span>
+                        <span id="task-text-${index}" class="ml-4 text-primary task-text flex-grow">${task.text}</span>
+                        <input id="task-input-${index}" type="text" value="${task.text}" class="hidden flex-grow p-2 ml-4 rounded-lg border border-teal-500 bg-container text-primary focus:outline-none">
                     </div>
-                    <button onclick="deleteTask(${index})" class="text-red-500 hover:text-red-700 transition-colors duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+                    <div class="flex items-center space-x-2 ml-2">
+                        <!-- Botón de edición/guardado -->
+                        <button id="edit-btn-${index}" onclick="toggleEditMode(${index})" class="text-gray-500 hover:text-teal-500 transition-colors duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232a2.5 2.5 0 013.536 3.536L6.5 21.036H3v-3.536l12.232-12.232zM15.232 5.232L18.768 8.768" />
+                            </svg>
+                        </button>
+                        <!-- Botón de eliminación -->
+                        <button onclick="deleteTask(${index})" class="text-red-500 hover:text-red-700 transition-colors duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
                 `;
                 todoList.appendChild(li);
             });
@@ -387,6 +398,54 @@ Lunes:
             renderTasks();
             showStatusMessage('Tarea eliminada con éxito.', true);
         }
+        
+        // Función para alternar entre el modo de visualización y edición
+        function toggleEditMode(index) {
+            const taskTextSpan = document.getElementById(`task-text-${index}`);
+            const taskInput = document.getElementById(`task-input-${index}`);
+            const editBtn = document.getElementById(`edit-btn-${index}`);
+            
+            // Si está en modo de edición, guardamos la tarea
+            if (taskInput.classList.contains('hidden')) {
+                // Modo de edición activado
+                taskTextSpan.classList.add('hidden');
+                taskInput.classList.remove('hidden');
+                taskInput.focus();
+                
+                // Cambiamos el icono a un disquete (guardar) y la función onclick
+                editBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                `;
+                editBtn.onclick = () => saveTask(index);
+
+            } else {
+                // Modo de visualización activado (guardado)
+                const newText = taskInput.value.trim();
+                if (newText === '') {
+                    showStatusMessage('El texto de la tarea no puede estar vacío.', false);
+                    taskInput.focus();
+                    return;
+                }
+
+                const tasks = getTasks();
+                tasks[index].text = newText;
+                saveTasks(tasks);
+                renderTasks();
+                showStatusMessage('Tarea editada con éxito.', true);
+            }
+        }
+        
+        // Guarda la tarea editada. Esta función se llama desde toggleEditMode.
+        function saveTask(index) {
+            // El toggleEditMode ya contiene la lógica de guardado,
+            // por lo que simplemente volvemos a llamarlo para que se encargue del proceso.
+            toggleEditMode(index);
+        }
+
 
         // Limpia todas las tareas completadas
         function clearCompletedTasks() {
@@ -438,7 +497,7 @@ Lunes:
         
         // Verificar la preferencia de tema del sistema o del localStorage
         const isDarkMode = localStorage.getItem('theme') === 'dark' || 
-                                     (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                                    (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
         // Establecer la clase inicial y los iconos
         if (isDarkMode) {
