@@ -130,8 +130,7 @@ let draggedItem = null;
 // Agrega una nueva variable global para el filtro actual
 let currentFilter = 'all'; // Puede ser 'all', 'completed' o 'active'
 
-// Actualiza la función renderTasks para mostrar la fecha límite
-
+// Actualiza la función renderTasks para incluir el campo de entrada de fecha
 function renderTasks() {
     const todoList = document.getElementById('todo-list');
     const tasks = getTasks();
@@ -150,6 +149,7 @@ function renderTasks() {
     }
 
     filteredTasks.forEach((task) => {
+        // Aseguramos un identificador único para cada tarea
         const originalIndex = tasks.findIndex(t => t.text === task.text && t.completed === task.completed && t.dueDate === task.dueDate);
         
         const li = document.createElement('li');
@@ -323,9 +323,9 @@ function addTask() {
         newTaskInput.value = '';
         newDueDateInput.value = ''; // Limpiamos también el campo de fecha
         renderTasks();
-        showNotification('Tarea agregada con éxito.', 'success');
+        //showStatusMessage('Tarea agregada con éxito.', true);
     } else {
-        showNotification('Por favor, ingresa una tarea.', 'error');
+        showStatusMessage('Por favor, ingresa una tarea.', false);
     }
 }
 
@@ -364,10 +364,11 @@ function toggleEditMode(index) {
         taskTextSpan.classList.add('hidden');
         taskTextInput.classList.remove('hidden');
         
-        if (dueDateSpan && dueDatePicker) {
+        // El campo de fecha siempre existe, solo lo mostramos
+        if (dueDateSpan) {
             dueDateSpan.classList.add('hidden');
-            dueDatePicker.classList.remove('hidden');
         }
+        dueDatePicker.classList.remove('hidden');
 
         taskTextInput.focus();
         editBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/></svg>`;
@@ -375,13 +376,11 @@ function toggleEditMode(index) {
         // Modo de visualización: guardar los cambios y ocultar los campos de entrada
         const tasks = getTasks();
         const newText = taskTextInput.value.trim();
-        const newDueDate = dueDatePicker ? dueDatePicker.value : null;
+        const newDueDate = dueDatePicker.value;
 
         if (newText !== "") {
             tasks[index].text = newText;
-            if (newDueDate !== null) {
-                tasks[index].dueDate = newDueDate;
-            }
+            tasks[index].dueDate = newDueDate || null; // Guarda la nueva fecha o null si el campo está vacío
             saveTasks(tasks);
             renderTasks();
             showNotification('Tarea editada con éxito.', 'success');
@@ -392,10 +391,10 @@ function toggleEditMode(index) {
             taskTextSpan.classList.remove('hidden');
             taskTextInput.classList.add('hidden');
             
-            if (dueDateSpan && dueDatePicker) {
+            if (dueDateSpan) {
                 dueDateSpan.classList.remove('hidden');
-                dueDatePicker.classList.add('hidden');
             }
+            dueDatePicker.classList.add('hidden');
         }
         editBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232a2.5 2.5 0 013.536 3.536L6.5 21.036H3v-3.536l12.232-12.232zM15.232 5.232L18.768 8.768" /></svg>`;
     }
@@ -415,7 +414,7 @@ function clearCompletedTasks() {
     const incompleteTasks = tasks.filter(task => !task.completed);
     saveTasks(incompleteTasks);
     renderTasks();
-    showStatusMessage('Se ha limpiado la lista de tareas.', true);
+    //('Se ha limpiado la lista de tareas.', true);
 }
 
 // --- NUEVA FUNCIÓN PARA COPIAR TODAS LAS TAREAS ---
