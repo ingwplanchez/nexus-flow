@@ -63,6 +63,12 @@
             -ms-overflow-style: none;  /* IE y Edge */
             scrollbar-width: none;     /* Firefox */
         }
+
+        /* Estilos para los elementos de la lista de tareas */
+        .todo-item.completed .task-text {
+            text-decoration: line-through;
+            color: #6b7280; /* Color gris para tareas completadas */
+        }
     </style>
 </head>
 <body class="transition-colors duration-300">
@@ -106,7 +112,8 @@
                     <button id="tab-eisenhower" class="inline-block p-4 rounded-t-lg border-b-2 border-transparent text-primary hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 dark:hover:border-gray-600 transition-colors duration-200 focus:outline-none" onclick="openTab('eisenhower-content')">Prioridad</button>
                     <button id="tab-laborit" class="inline-block p-4 rounded-t-lg border-b-2 border-transparent text-primary hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 dark:hover:border-gray-600 transition-colors duration-200 focus:outline-none" onclick="openTab('laborit-content')">Esfuerzo</button>
                     <button id="tab-yerkes-dodson" class="inline-block p-4 rounded-t-lg border-b-2 border-transparent text-primary hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 dark:hover:border-gray-600 transition-colors duration-200 focus:outline-none" onclick="openTab('yerkes-dodson-content')">Plan Diario</button>
-                    <!-- <button id="tab-history" class="inline-block p-4 rounded-t-lg border-b-2 border-transparent text-primary hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 dark:hover:border-gray-600 transition-colors duration-200 focus:outline-none" onclick="openTab('history-content')">Historial</button> -->
+                    <!-- NUEVA PESTAÑA DE TAREAS -->
+                    <button id="tab-todo-list" class="inline-block p-4 rounded-t-lg border-b-2 border-transparent text-primary hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 dark:hover:border-gray-600 transition-colors duration-200 focus:outline-none" onclick="openTab('todo-list-content')">Tareas</button>
                 </div>
 
                 <!-- Contenido de las pestañas -->
@@ -165,18 +172,23 @@ Lunes:
                         </div>
                     </div>
                     
-                    <!-- Contenido para el historial -->
-                    <!--
-                    <div id="history-content" class="space-y-4 hidden">
-                        <h2 class="text-xl sm:text-2xl font-semibold text-primary">Historial</h2>
-                        <button onclick="fetchHistory()" class="w-full bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition duration-300 shadow-md">
-                            Ver Historial de Tareas y Planes
-                        </button>
-                        <div id="history-result" class="bg-secondary p-4 rounded-lg text-primary min-h-[60px] text-left transition-colors duration-300">
-                            <p>El historial aparecerá aquí...</p>
+                    <!-- NUEVO CONTENIDO PARA LA LISTA DE TAREAS -->
+                    <div id="todo-list-content" class="space-y-4 hidden">
+                        <h2 class="text-xl sm:text-2xl font-semibold text-primary">Lista de Tareas</h2>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input id="new-task-input" type="text" placeholder="Agrega una nueva tarea..." class="flex-grow p-4 border border-primary bg-container rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-primary">
+                            <button onclick="addTask()" class="mt-2 sm:mt-0 px-6 py-3 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-700 transition duration-300 shadow-md">
+                                Agregar Tarea
+                            </button>
                         </div>
+                        <ul id="todo-list" class="space-y-2">
+                            <!-- Las tareas se renderizarán aquí -->
+                        </ul>
+                        <button onclick="clearCompletedTasks()" class="w-full text-center px-6 py-3 text-red-500 font-bold hover:text-red-700 transition duration-300 focus:outline-none">
+                            Limpiar Tareas Completadas
+                        </button>
                     </div>
-                    -->
+
                 </div>
             </div>
         </div>
@@ -295,86 +307,97 @@ Lunes:
             }
         }
         
-        // Función para obtener y mostrar el historial
-        async function fetchHistory() {
-            const resultDiv = document.getElementById('history-result');
-            showLoading('history-result');
-            
-            try {
-                // Hacemos las llamadas a los nuevos endpoints de historial
-                const tasksResponse = await fetch('/api/tasks/history/');
-                const plansResponse = await fetch('/api/daily-plans/history/');
-
-                if (!tasksResponse.ok || !plansResponse.ok) {
-                    throw new Error("No se pudo cargar el historial.");
-                }
-
-                const tasksData = await tasksResponse.json();
-                const plansData = await plansResponse.json();
-                
-                // Función para obtener el color de fondo basado en la categoría de Eisenhower
-                const getCategoryColor = (category) => {
-                    const lowerCategory = category.toLowerCase();
-                    if (lowerCategory.includes('urgente') && lowerCategory.includes('importante')) return 'bg-red-400';
-                    if (lowerCategory.includes('urgente') && lowerCategory.includes('no importante')) return 'bg-yellow-400';
-                    if (lowerCategory.includes('no urgente') && lowerCategory.includes('importante')) return 'bg-green-400';
-                    if (lowerCategory.includes('no urgente') && lowerCategory.includes('no importante')) return 'bg-blue-400';
-                    return 'bg-gray-400'; // Color por defecto
-                };
-
-                let historyHtml = '<div class="space-y-8">';
-                
-                // Generar HTML para las tarjetas de tareas
-                if (tasksData.tasks && tasksData.tasks.length > 0) {
-                    historyHtml += '<h3 class="text-xl font-semibold text-primary">Historial de Tareas</h3>';
-                    historyHtml += '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">';
-                    tasksData.tasks.forEach(task => {
-                        const date = new Date(task.created_at).toLocaleDateString();
-                        const time = new Date(task.created_at).toLocaleTimeString();
-                        const color = getCategoryColor(task.eisenhower_category);
-                        historyHtml += `
-                            <div class="p-4 rounded-lg shadow-md border-2 border-transparent hover:border-blue-500 transition-all duration-300 ${color} text-white">
-                                <p class="font-bold mb-1">${task.description}</p>
-                                <p class="text-sm">Categoría: ${task.eisenhower_category}</p>
-                                <p class="text-xs text-right mt-2">${date} ${time}</p>
-                            </div>
-                        `;
-                    });
-                    historyHtml += '</div>';
-                } else {
-                    historyHtml += `<p class="text-secondary text-center">No hay tareas guardadas.</p>`;
-                }
-
-                // Generar HTML para las tarjetas de planes diarios
-                if (plansData.daily_plans && plansData.daily_plans.length > 0) {
-                    historyHtml += `<h3 class="text-xl font-semibold text-primary mt-8">Historial de Planes Diarios</h3>`;
-                    historyHtml += '<div class="grid grid-cols-1 gap-4">';
-                    plansData.daily_plans.forEach(plan => {
-                        const date = new Date(plan.created_at).toLocaleDateString();
-                        const time = new Date(plan.created_at).toLocaleTimeString();
-                        historyHtml += `
-                            <div class="p-4 rounded-lg shadow-md border-2 border-transparent hover:border-blue-500 transition-all duration-300 bg-gray-500 dark:bg-gray-700 text-white">
-                                <p class="font-bold mb-1">Plan del día:</p>
-                                <p class="text-sm whitespace-pre-wrap">${plan.plan_text}</p>
-                                <p class="text-xs text-right mt-2">${date} ${time}</p>
-                            </div>
-                        `;
-                    });
-                    historyHtml += '</div>';
-                } else {
-                    historyHtml += `<p class="text-secondary text-center">No hay planes guardados.</p>`;
-                }
-
-                historyHtml += '</div>';
-                resultDiv.innerHTML = historyHtml;
-
-            } catch (error) {
-                resultDiv.innerHTML = `<p class="text-red-600">Error al cargar el historial: ${error.message}</p>`;
-                console.error('Error al cargar el historial:', error);
-            }
+        // --- NUEVAS FUNCIONES PARA LA LISTA DE TAREAS ---
+        
+        // Carga las tareas desde localStorage
+        function getTasks() {
+            const tasks = localStorage.getItem('todoTasks');
+            return tasks ? JSON.parse(tasks) : [];
         }
 
-        // LÓGICA DE LAS PESTAÑAS (TABS)
+        // Guarda las tareas en localStorage
+        function saveTasks(tasks) {
+            localStorage.setItem('todoTasks', JSON.stringify(tasks));
+        }
+
+        // Renderiza las tareas en el DOM
+        function renderTasks() {
+            const todoList = document.getElementById('todo-list');
+            const tasks = getTasks();
+            todoList.innerHTML = ''; // Limpia la lista actual
+            
+            if (tasks.length === 0) {
+                todoList.innerHTML = '<p class="text-secondary text-center">No tienes tareas pendientes. ¡Hora de agregar una!</p>';
+                return;
+            }
+
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.className = `p-4 rounded-lg shadow flex items-center justify-between ${task.completed ? 'bg-gray-400 dark:bg-gray-600' : 'bg-secondary'} transition-colors duration-300`;
+                li.classList.add('todo-item');
+                if (task.completed) {
+                    li.classList.add('completed');
+                }
+
+                li.innerHTML = `
+                    <div class="flex items-center flex-grow">
+                        <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${index})" class="h-5 w-5 rounded text-teal-600 border-gray-300 focus:ring-teal-500">
+                        <span class="ml-4 text-primary task-text">${task.text}</span>
+                    </div>
+                    <button onclick="deleteTask(${index})" class="text-red-500 hover:text-red-700 transition-colors duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                `;
+                todoList.appendChild(li);
+            });
+        }
+        
+        // Agrega una nueva tarea a la lista
+        function addTask() {
+            const input = document.getElementById('new-task-input');
+            const taskText = input.value.trim();
+            if (taskText === '') {
+                showStatusMessage('Por favor, escribe una tarea para agregar.', false);
+                return;
+            }
+            
+            const tasks = getTasks();
+            tasks.push({ text: taskText, completed: false });
+            saveTasks(tasks);
+            renderTasks();
+            input.value = ''; // Limpia el input
+            showStatusMessage('Tarea agregada con éxito.', true);
+        }
+
+        // Marca una tarea como completada/incompleta
+        function toggleTask(index) {
+            const tasks = getTasks();
+            tasks[index].completed = !tasks[index].completed;
+            saveTasks(tasks);
+            renderTasks();
+        }
+
+        // Elimina una tarea de la lista
+        function deleteTask(index) {
+            const tasks = getTasks();
+            tasks.splice(index, 1);
+            saveTasks(tasks);
+            renderTasks();
+            showStatusMessage('Tarea eliminada con éxito.', true);
+        }
+
+        // Limpia todas las tareas completadas
+        function clearCompletedTasks() {
+            const tasks = getTasks();
+            const incompleteTasks = tasks.filter(task => !task.completed);
+            saveTasks(incompleteTasks);
+            renderTasks();
+            showStatusMessage('Tareas completadas limpiadas.', true);
+        }
+
+        // --- LÓGICA DE LAS PESTAÑAS (TABS) ---
         function openTab(tabId) {
             // Oculta todos los contenidos de las pestañas
             const tabContents = document.querySelectorAll('[id$="-content"]');
@@ -383,7 +406,7 @@ Lunes:
             // Quita el estilo de "activo" de todos los botones de pestañas
             const tabButtons = document.querySelectorAll('button[id^="tab-"]');
             tabButtons.forEach(button => {
-                button.classList.remove('border-purple-500', 'font-bold');
+                button.classList.remove('border-purple-500', 'border-green-500', 'border-blue-500', 'border-teal-500', 'font-bold');
                 button.classList.add('border-transparent');
             });
 
@@ -396,7 +419,14 @@ Lunes:
             // Agrega el estilo de "activo" al botón de la pestaña seleccionada
             const selectedButton = document.getElementById('tab-' + tabId.replace('-content', ''));
             if (selectedButton) {
-                selectedButton.classList.add('border-purple-500', 'font-bold');
+                let borderColor = 'border-purple-500';
+                switch(tabId) {
+                    case 'eisenhower-content': borderColor = 'border-purple-500'; break;
+                    case 'laborit-content': borderColor = 'border-green-500'; break;
+                    case 'yerkes-dodson-content': borderColor = 'border-blue-500'; break;
+                    case 'todo-list-content': borderColor = 'border-teal-500'; break;
+                }
+                selectedButton.classList.add(borderColor, 'font-bold');
                 selectedButton.classList.remove('border-transparent');
             }
         }
@@ -408,7 +438,7 @@ Lunes:
         
         // Verificar la preferencia de tema del sistema o del localStorage
         const isDarkMode = localStorage.getItem('theme') === 'dark' || 
-                                (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                                     (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
         // Establecer la clase inicial y los iconos
         if (isDarkMode) {
@@ -449,6 +479,8 @@ Lunes:
             }
             // Abre la primera pestaña por defecto al cargar la página
             openTab('eisenhower-content');
+            // Carga las tareas existentes al iniciar la página
+            renderTasks();
         });
     </script>
 </body>
