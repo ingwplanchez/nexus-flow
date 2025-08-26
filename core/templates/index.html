@@ -129,9 +129,22 @@
                         <ul id="todo-list" class="space-y-2">
                             <!-- Las tareas se renderizarán aquí -->
                         </ul>
-                        <button onclick="clearCompletedTasks()" class="w-full text-center px-6 py-3 text-red-500 font-bold hover:text-red-700 transition duration-300 focus:outline-none">
-                            Limpiar Tareas Completadas
-                        </button>
+                        <div class="flex flex-col sm:flex-row gap-2 mt-4">
+
+                            <!-- Botón para copiar tareas -->
+                            <button onclick="copyTasks()" class="w-full sm:w-1/2 text-center px-6 py-3 bg-black text-white font-bold rounded-lg hover:bg-neutral-900 transition duration-300 focus:outline-none shadow-md flex items-center justify-center space-x-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7v4a1 1 0 01-1 1H4a1 1 0 01-1-1V7a1 1 0 011-1h3a1 1 0 011 1zM11 10h10a1 1 0 011 1v10a1 1 0 01-1 1H11a1 1 0 01-1-1V11a1 1 0 011-1zM11 10V4a1 1 0 011-1h6a1 1 0 011 1v6" />
+                                </svg>
+                                <span>Copiar Tareas</span>
+                            </button>
+
+                            <!-- Botón para limpiar tareas completadas -->
+                            <button onclick="clearCompletedTasks()" class="w-full sm:w-1/2 text-center px-6 py-3 text-red-500 font-bold hover:text-red-700 transition duration-300 focus:outline-none border border-red-500 rounded-lg">
+                                Limpiar Tareas Completadas
+                            </button>
+
+                        </div>
                     </div>
 
                     <!-- Contenido para la Matriz de Eisenhower -->
@@ -444,7 +457,6 @@ Lunes:
             toggleEditMode(index);
         }
 
-
         // Limpia todas las tareas completadas
         function clearCompletedTasks() {
             const tasks = getTasks();
@@ -453,6 +465,39 @@ Lunes:
             renderTasks();
             showStatusMessage('Tareas completadas limpiadas.', true);
         }
+
+        // --- NUEVA FUNCIÓN PARA COPIAR TODAS LAS TAREAS ---
+        async function copyTasks() {
+            const tasks = getTasks();
+            if (tasks.length === 0) {
+                showStatusMessage('No hay tareas para copiar.', false);
+                return;
+            }
+
+            // Mapea las tareas a una lista de cadenas de texto y únelas con saltos de línea
+            const tasksText = tasks.map(task => task.text).join('\n');
+
+            try {
+                // Usa la API de Portapapeles para escribir el texto
+                // Usamos `document.execCommand` como respaldo por si `navigator.clipboard` falla
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(tasksText);
+                } else {
+                    // Fallback para navegadores antiguos
+                    const textarea = document.createElement('textarea');
+                    textarea.value = tasksText;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                }
+                showStatusMessage('Tareas copiadas al portapapeles con éxito.', true);
+            } catch (err) {
+                console.error('Error al copiar el texto: ', err);
+                showStatusMessage('Ocurrió un error al intentar copiar las tareas.', false);
+            }
+        }
+
 
         // --- LÓGICA DE LAS PESTAÑAS (TABS) ---
         function openTab(tabId) {
@@ -495,7 +540,7 @@ Lunes:
         
         // Verificar la preferencia de tema del sistema o del localStorage
         const isDarkMode = localStorage.getItem('theme') === 'dark' || 
-                                     (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                                    (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
         // Establecer la clase inicial y los iconos
         if (isDarkMode) {
