@@ -60,7 +60,7 @@
             display: none;
         }
         .no-scrollbar {
-            -ms-overflow-style: none;  /* IE y Edge */
+            -ms-overflow-style: none;   /* IE y Edge */
             scrollbar-width: none;      /* Firefox */
         }
 
@@ -107,19 +107,35 @@
             
             <!-- CONTENEDOR DE PESTAÑAS (TABS) -->
             <div class="mt-8">
-                <!-- Botones de las pestañas -->
+                <!-- Botones de las pestañas - ¡Ahora Tareas es la primera! -->
                 <div class="flex flex-wrap -mb-px text-sm font-medium text-center border-b border-primary">
+                    <button id="tab-todo-list" class="inline-block p-4 rounded-t-lg border-b-2 border-transparent text-primary hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 dark:hover:border-gray-600 transition-colors duration-200 focus:outline-none" onclick="openTab('todo-list-content')">Tareas</button>
                     <button id="tab-eisenhower" class="inline-block p-4 rounded-t-lg border-b-2 border-transparent text-primary hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 dark:hover:border-gray-600 transition-colors duration-200 focus:outline-none" onclick="openTab('eisenhower-content')">Prioridad</button>
                     <button id="tab-laborit" class="inline-block p-4 rounded-t-lg border-b-2 border-transparent text-primary hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 dark:hover:border-gray-600 transition-colors duration-200 focus:outline-none" onclick="openTab('laborit-content')">Esfuerzo</button>
                     <button id="tab-yerkes-dodson" class="inline-block p-4 rounded-t-lg border-b-2 border-transparent text-primary hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 dark:hover:border-gray-600 transition-colors duration-200 focus:outline-none" onclick="openTab('yerkes-dodson-content')">Plan Diario</button>
-                    <!-- NUEVA PESTAÑA DE TAREAS -->
-                    <button id="tab-todo-list" class="inline-block p-4 rounded-t-lg border-b-2 border-transparent text-primary hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 dark:hover:border-gray-600 transition-colors duration-200 focus:outline-none" onclick="openTab('todo-list-content')">Tareas</button>
                 </div>
 
                 <!-- Contenido de las pestañas -->
                 <div class="py-4">
+                    <!-- CONTENIDO PARA LA LISTA DE TAREAS - ¡Ahora es el primero! -->
+                    <div id="todo-list-content" class="space-y-4">
+                        <h2 class="text-xl sm:text-2xl font-semibold text-primary">Lista de Tareas</h2>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input id="new-task-input" type="text" placeholder="Agrega una nueva tarea..." class="flex-grow p-4 border border-primary bg-container rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-primary">
+                            <button onclick="addTask()" class="mt-2 sm:mt-0 px-6 py-3 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-700 transition duration-300 shadow-md">
+                                Agregar Tarea
+                            </button>
+                        </div>
+                        <ul id="todo-list" class="space-y-2">
+                            <!-- Las tareas se renderizarán aquí -->
+                        </ul>
+                        <button onclick="clearCompletedTasks()" class="w-full text-center px-6 py-3 text-red-500 font-bold hover:text-red-700 transition duration-300 focus:outline-none">
+                            Limpiar Tareas Completadas
+                        </button>
+                    </div>
+
                     <!-- Contenido para la Matriz de Eisenhower -->
-                    <div id="eisenhower-content" class="space-y-4">
+                    <div id="eisenhower-content" class="space-y-4 hidden">
                         <h2 class="text-xl sm:text-2xl font-semibold text-primary">Matriz de Eisenhower</h2>
                         <div class="input-group">
                             <textarea id="eisenhower-input" class="w-full p-4 border border-primary bg-container rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-primary" rows="7" placeholder="Coloca una o varias tareas. Prioriza tus actividades según su urgencia e importancia. Ejemplo: 
@@ -171,24 +187,6 @@ Lunes:
                             <p>El resultado aparecerá aquí...</p>
                         </div>
                     </div>
-                    
-                    <!-- NUEVO CONTENIDO PARA LA LISTA DE TAREAS -->
-                    <div id="todo-list-content" class="space-y-4 hidden">
-                        <h2 class="text-xl sm:text-2xl font-semibold text-primary">Lista de Tareas</h2>
-                        <div class="flex flex-col sm:flex-row gap-2">
-                            <input id="new-task-input" type="text" placeholder="Agrega una nueva tarea..." class="flex-grow p-4 border border-primary bg-container rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-primary">
-                            <button onclick="addTask()" class="mt-2 sm:mt-0 px-6 py-3 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-700 transition duration-300 shadow-md">
-                                Agregar Tarea
-                            </button>
-                        </div>
-                        <ul id="todo-list" class="space-y-2">
-                            <!-- Las tareas se renderizarán aquí -->
-                        </ul>
-                        <button onclick="clearCompletedTasks()" class="w-full text-center px-6 py-3 text-red-500 font-bold hover:text-red-700 transition duration-300 focus:outline-none">
-                            Limpiar Tareas Completadas
-                        </button>
-                    </div>
-
                 </div>
             </div>
         </div>
@@ -497,7 +495,7 @@ Lunes:
         
         // Verificar la preferencia de tema del sistema o del localStorage
         const isDarkMode = localStorage.getItem('theme') === 'dark' || 
-                                    (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                                     (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
         // Establecer la clase inicial y los iconos
         if (isDarkMode) {
@@ -536,8 +534,8 @@ Lunes:
                 csrfInput.value = csrfToken;
                 logoutForm.appendChild(csrfInput);
             }
-            // Abre la primera pestaña por defecto al cargar la página
-            openTab('eisenhower-content');
+            // AHORA LA PESTAÑA DE TAREAS ES LA PRIMERA EN ABRIRSE
+            openTab('todo-list-content'); 
             // Carga las tareas existentes al iniciar la página
             renderTasks();
         });
