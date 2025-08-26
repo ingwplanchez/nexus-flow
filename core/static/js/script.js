@@ -130,12 +130,13 @@ let draggedItem = null;
 // Agrega una nueva variable global para el filtro actual
 let currentFilter = 'all'; // Puede ser 'all', 'completed' o 'active'
 
-// Actualiza la función renderTasks para incluir el campo de entrada de fecha
+// Actualiza la función renderTasks para que filtre la lista antes de renderizarla
 function renderTasks() {
     const todoList = document.getElementById('todo-list');
     const tasks = getTasks();
-    todoList.innerHTML = '';
+    todoList.innerHTML = ''; // Limpia la lista actual
     
+    // Filtramos las tareas según el filtro actual
     let filteredTasks = tasks;
     if (currentFilter === 'completed') {
         filteredTasks = tasks.filter(task => task.completed);
@@ -148,10 +149,12 @@ function renderTasks() {
         return;
     }
 
-    filteredTasks.forEach((task) => {
-        // Aseguramos un identificador único para cada tarea
-        const originalIndex = tasks.findIndex(t => t.text === task.text && t.completed === task.completed && t.dueDate === task.dueDate);
-        
+    filteredTasks.forEach((task, index) => {
+        // En lugar de usar el índice del arreglo filtrado,
+        // necesitamos el índice del arreglo original para las funciones
+        // de edición y eliminación. Para esto, buscamos el índice original.
+        const originalIndex = tasks.findIndex(t => t.text === task.text && t.completed === task.completed);
+
         const li = document.createElement('li');
         li.className = `p-4 rounded-lg shadow flex items-center justify-between ${task.completed ? 'bg-gray-400 dark:bg-gray-600' : 'bg-secondary'} transition-colors duration-300`;
         li.classList.add('todo-item');
@@ -162,15 +165,11 @@ function renderTasks() {
         li.draggable = true;
         li.dataset.index = originalIndex;
 
-        const dueDateText = task.dueDate ? `<span class="text-sm text-gray-500 dark:text-gray-400 ml-4 due-date-text">Fecha límite: ${task.dueDate}</span>` : '';
-
         li.innerHTML = `
             <div class="flex items-center flex-grow">
                 <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${originalIndex})" class="h-5 w-5 rounded text-teal-600 border-gray-300 focus:ring-teal-500">
                 <span id="task-text-${originalIndex}" class="ml-4 text-primary task-text flex-grow">${task.text}</span>
                 <input id="task-input-${originalIndex}" type="text" value="${task.text}" class="hidden flex-grow p-2 ml-4 rounded-lg border border-teal-500 bg-container text-primary focus:outline-none">
-                ${dueDateText}
-                <input type="date" value="${task.dueDate || ''}" class="p-2 ml-4 rounded-lg border border-teal-500 bg-container text-primary hidden due-date-picker">
             </div>
             <div class="flex items-center space-x-2 ml-2">
                 <!-- Botón de edición/guardado -->
@@ -194,13 +193,29 @@ function renderTasks() {
 }
 
 
-// Nueva función para cambiar el filtro
+// Nueva función para cambiar el filtro y actualizar el estilo de los botones
 function setFilter(filter) {
     currentFilter = filter;
-    renderTasks();
-    //showStatusMessage(`Mostrando tareas: ${filter}`, true);
-}
+    
+    // 1. Quita el estilo 'activo' de todos los botones
+    document.querySelectorAll('.todo-list-filters button').forEach(button => {
+        button.classList.remove('bg-teal-500', 'text-white');
+        button.classList.add('bg-secondary', 'text-primary');
+    });
 
+    // 2. Agrega el estilo 'activo' solo al botón que fue clickeado
+    const selectedButton = document.getElementById(`filter-${filter}`);
+    if (selectedButton) {
+        selectedButton.classList.remove('bg-secondary', 'text-primary');
+        selectedButton.classList.add('bg-teal-500', 'text-white');
+    }
+
+    renderTasks();
+    
+    //showStatusMessage(`Mostrando tareas: ${filter}`, true);
+    //showNotification(`Mostrando tareas: ${filter}`, 'info');
+
+}
 
 /**
  * Añade los manejadores de eventos para arrastrar y soltar a todos los elementos de la lista.

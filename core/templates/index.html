@@ -60,12 +60,12 @@
                         
                         <!-- <h2 class="text-xl sm:text-2xl font-semibold text-primary">Lista de Tareas</h2> -->
 
-                        <div class="flex justify-start space-x-4 mb-4">
-                            <button onclick="setFilter('all')" class="px-4 py-2 rounded-lg text-primary bg-secondary hover:bg-teal-500 transition-colors duration-300">Todas</button>
-                            <button onclick="setFilter('active')" class="px-4 py-2 rounded-lg text-primary bg-secondary hover:bg-teal-500 transition-colors duration-300">Pendientes</button>
-                            <button onclick="setFilter('completed')" class="px-4 py-2 rounded-lg text-primary bg-secondary hover:bg-teal-500 transition-colors duration-300">Completadas</button>
+                        <div class="flex justify-start space-x-4 mb-4 todo-list-filters">
+                            <button id="filter-all" onclick="setFilter('all')" class="px-4 py-2 rounded-lg text-white bg-teal-500 hover:bg-teal-500 transition-colors duration-300">Todas</button>
+                            <button id="filter-active" onclick="setFilter('active')" class="px-4 py-2 rounded-lg text-primary bg-secondary hover:bg-teal-500 transition-colors duration-300">Pendientes</button>
+                            <button id="filter-completed" onclick="setFilter('completed')" class="px-4 py-2 rounded-lg text-primary bg-secondary hover:bg-teal-500 transition-colors duration-300">Completadas</button>
                         </div>
-
+                        
                         <!-- Sección para agregar tareas y fechas de vencimiento -->
 
                         <div class="mb-6 flex space-x-2">
