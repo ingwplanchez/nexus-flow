@@ -63,7 +63,7 @@ async function callBackendApi(endpoint, data) {
 async function analyzeEisenhower() {
     const input = document.getElementById('eisenhower-input').value;
     if (!input) {
-        showStatusMessage('Por favor, ingresa una tarea para analizar.', false);
+        showStatusMessage('Por favor, ingresa al menos una tarea para analizar.', false);
         return;
     }
     const resultDiv = document.getElementById('eisenhower-result');
@@ -388,7 +388,7 @@ function clearCompletedTasks() {
     const incompleteTasks = tasks.filter(task => !task.completed);
     saveTasks(incompleteTasks);
     renderTasks();
-    //showStatusMessage('Se ha limpiado la lista de tareas.', true);
+    showStatusMessage('Se ha limpiado la lista de tareas.', true);
 }
 
 // --- NUEVA FUNCIÓN PARA COPIAR TODAS LAS TAREAS ---
