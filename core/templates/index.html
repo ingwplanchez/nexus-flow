@@ -1,5 +1,4 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="es" class="dark">
 <head>
@@ -65,7 +64,7 @@
                                 Agregar Tarea
                             </button>
                         </div>
-                        <ul id="todo-list" class="space-y-2">
+                        <ul id="todo-list" class="space-y-2 draggable-list" ondragover="allowDrop(event)">
                             <!-- Las tareas se renderizarán aquí -->
                         </ul>
                         <div class="flex flex-col sm:flex-row gap-2 mt-4">

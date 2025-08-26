@@ -123,7 +123,10 @@ function saveTasks(tasks) {
     localStorage.setItem('todoTasks', JSON.stringify(tasks));
 }
 
-// Renderiza las tareas en el DOM
+// Variable para almacenar el elemento que se está arrastrando
+let draggedItem = null;
+
+// Renderiza las tareas en el DOM con soporte para arrastrar y soltar
 function renderTasks() {
     const todoList = document.getElementById('todo-list');
     const tasks = getTasks();
@@ -141,6 +144,10 @@ function renderTasks() {
         if (task.completed) {
             li.classList.add('completed');
         }
+
+        // Hacemos que cada tarea sea arrastrable
+        li.draggable = true;
+        li.dataset.index = index; // Almacenamos el índice en un atributo de datos
 
         // Usamos un span para el texto de la tarea y un input para la edición
         li.innerHTML = `
@@ -166,6 +173,110 @@ function renderTasks() {
         `;
         todoList.appendChild(li);
     });
+
+    // ¡La solución! Vuelve a asignar los "event listeners" de arrastrar y soltar
+    addDragAndDropListeners();
+}
+
+/**
+ * Añade los manejadores de eventos para arrastrar y soltar a todos los elementos de la lista.
+ * Esta función ahora solo se llama una vez al inicio.
+ */
+function addDragAndDropListeners() {
+    const listItems = document.querySelectorAll('.todo-item');
+    listItems.forEach(item => {
+        // Evento que se dispara cuando se comienza a arrastrar un elemento
+        item.addEventListener('dragstart', () => {
+            draggedItem = item;
+            // Añade una pequeña demora para que la clase 'dragging' se aplique correctamente
+            setTimeout(() => {
+                item.classList.add('dragging');
+            }, 0);
+        });
+
+        // Evento que se dispara cuando se suelta el arrastre
+        item.addEventListener('dragend', () => {
+            if (draggedItem) {
+                draggedItem.classList.remove('dragging');
+                draggedItem = null;
+            }
+        });
+    });
+
+    // Maneja el arrastre sobre la lista para reordenar los elementos
+    const todoList = document.getElementById('todo-list');
+    todoList.addEventListener('dragover', (e) => {
+        e.preventDefault(); // Permite que se dispare el evento 'drop'
+        const afterElement = getDragAfterElement(todoList, e.clientY);
+        const draggingElement = document.querySelector('.dragging');
+        if (draggingElement == null) return; // Salir si no hay un elemento arrastrado válido
+
+        if (afterElement == null) {
+            // Si el elemento arrastrado está al final de la lista
+            todoList.appendChild(draggingElement);
+        } else {
+            // Inserta el elemento arrastrado antes del elemento de referencia
+            todoList.insertBefore(draggingElement, afterElement);
+        }
+    });
+
+    // Maneja el evento de soltar para actualizar el orden en localStorage
+    todoList.addEventListener('drop', () => {
+        const draggingElement = document.querySelector('.dragging');
+        if (!draggingElement) return;
+
+        const tasks = getTasks();
+        const newOrder = Array.from(todoList.children).map(li => {
+            const index = parseInt(li.dataset.index);
+            return tasks[index];
+        });
+        
+        saveTasks(newOrder);
+        updateTaskIndexes(); // Actualiza los índices de los elementos del DOM
+        //showStatusMessage('Tareas reordenadas con éxito.', true);
+    });
+}
+
+/**
+ * Función auxiliar para determinar dónde colocar el elemento arrastrado.
+ * @param {HTMLElement} container El contenedor de la lista de tareas.
+ * @param {number} y La coordenada Y del cursor.
+ * @returns {HTMLElement|null} El elemento después del cual se debe colocar el elemento arrastrado.
+ */
+function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.todo-item:not(.dragging)')];
+
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+/**
+ * Actualiza los índices de los atributos de datos de los elementos de la lista.
+ * Esto es crucial para que las funciones de eliminación y edición sigan funcionando
+ * después de una reorganización.
+ */
+function updateTaskIndexes() {
+    const listItems = document.querySelectorAll('.todo-item');
+    listItems.forEach((item, newIndex) => {
+        // Actualizamos el atributo de datos
+        item.dataset.index = newIndex;
+        
+        // También actualizamos los onclocks de los botones y el checkbox
+        const checkbox = item.querySelector('input[type="checkbox"]');
+        const editBtn = item.querySelector('button[onclick^="toggleEditMode"]');
+        const deleteBtn = item.querySelector('button[onclick^="deleteTask"]');
+        
+        if (checkbox) checkbox.setAttribute('onchange', `toggleTask(${newIndex})`);
+        if (editBtn) editBtn.setAttribute('onclick', `toggleEditMode(${newIndex})`);
+        if (deleteBtn) deleteBtn.setAttribute('onclick', `deleteTask(${newIndex})`);
+    });
 }
 
 // Agrega una nueva tarea a la lista
@@ -182,7 +293,7 @@ function addTask() {
     saveTasks(tasks);
     renderTasks();
     input.value = ''; // Limpia el input
-    showStatusMessage('Tarea agregada con éxito.', true);
+    //showStatusMessage('Tarea agregada con éxito.', true);
 }
 
 // Marca una tarea como completada/incompleta
@@ -199,7 +310,7 @@ function deleteTask(index) {
     tasks.splice(index, 1);
     saveTasks(tasks);
     renderTasks();
-    showStatusMessage('Tarea eliminada con éxito.', true);
+    //showStatusMessage('Tarea eliminada con éxito.', true);
 }
 
 // Función para alternar entre el modo de visualización y edición
@@ -238,7 +349,7 @@ function toggleEditMode(index) {
         tasks[index].text = newText;
         saveTasks(tasks);
         renderTasks();
-        showStatusMessage('Tarea editada con éxito.', true);
+        //showStatusMessage('Tarea editada con éxito.', true);
     }
 }
 
@@ -255,7 +366,7 @@ function clearCompletedTasks() {
     const incompleteTasks = tasks.filter(task => !task.completed);
     saveTasks(incompleteTasks);
     renderTasks();
-    showStatusMessage('Tareas completadas limpiadas.', true);
+    //showStatusMessage('Se ha limpiado la lista de tareas.', true);
 }
 
 // --- NUEVA FUNCIÓN PARA COPIAR TODAS LAS TAREAS ---
@@ -332,7 +443,7 @@ const sunIcon = document.getElementById('sun-icon');
 
 // Verificar la preferencia de tema del sistema o del localStorage
 const isDarkMode = localStorage.getItem('theme') === 'dark' || 
-                            (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                             (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
 // Establecer la clase inicial y los iconos
 if (isDarkMode) {
