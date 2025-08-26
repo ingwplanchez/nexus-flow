@@ -130,13 +130,13 @@ let draggedItem = null;
 // Agrega una nueva variable global para el filtro actual
 let currentFilter = 'all'; // Puede ser 'all', 'completed' o 'active'
 
-// Actualiza la función renderTasks para que filtre la lista antes de renderizarla
+// Actualiza la función renderTasks para mostrar la fecha límite
+
 function renderTasks() {
     const todoList = document.getElementById('todo-list');
     const tasks = getTasks();
-    todoList.innerHTML = ''; // Limpia la lista actual
+    todoList.innerHTML = '';
     
-    // Filtramos las tareas según el filtro actual
     let filteredTasks = tasks;
     if (currentFilter === 'completed') {
         filteredTasks = tasks.filter(task => task.completed);
@@ -149,12 +149,9 @@ function renderTasks() {
         return;
     }
 
-    filteredTasks.forEach((task, index) => {
-        // En lugar de usar el índice del arreglo filtrado,
-        // necesitamos el índice del arreglo original para las funciones
-        // de edición y eliminación. Para esto, buscamos el índice original.
-        const originalIndex = tasks.findIndex(t => t.text === task.text && t.completed === task.completed);
-
+    filteredTasks.forEach((task) => {
+        const originalIndex = tasks.findIndex(t => t.text === task.text && t.completed === task.completed && t.dueDate === task.dueDate);
+        
         const li = document.createElement('li');
         li.className = `p-4 rounded-lg shadow flex items-center justify-between ${task.completed ? 'bg-gray-400 dark:bg-gray-600' : 'bg-secondary'} transition-colors duration-300`;
         li.classList.add('todo-item');
@@ -165,11 +162,15 @@ function renderTasks() {
         li.draggable = true;
         li.dataset.index = originalIndex;
 
+        const dueDateText = task.dueDate ? `<span class="text-sm text-gray-500 dark:text-gray-400 ml-4 due-date-text">Fecha límite: ${task.dueDate}</span>` : '';
+
         li.innerHTML = `
             <div class="flex items-center flex-grow">
                 <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${originalIndex})" class="h-5 w-5 rounded text-teal-600 border-gray-300 focus:ring-teal-500">
                 <span id="task-text-${originalIndex}" class="ml-4 text-primary task-text flex-grow">${task.text}</span>
                 <input id="task-input-${originalIndex}" type="text" value="${task.text}" class="hidden flex-grow p-2 ml-4 rounded-lg border border-teal-500 bg-container text-primary focus:outline-none">
+                ${dueDateText}
+                <input type="date" value="${task.dueDate || ''}" class="p-2 ml-4 rounded-lg border border-teal-500 bg-container text-primary hidden due-date-picker">
             </div>
             <div class="flex items-center space-x-2 ml-2">
                 <!-- Botón de edición/guardado -->
@@ -191,6 +192,7 @@ function renderTasks() {
 
     addDragAndDropListeners();
 }
+
 
 // Nueva función para cambiar el filtro
 function setFilter(filter) {
@@ -301,21 +303,30 @@ function updateTaskIndexes() {
     });
 }
 
-// Agrega una nueva tarea a la lista
+
+// Actualiza la función addTask para incluir la fecha límite
 function addTask() {
-    const input = document.getElementById('new-task-input');
-    const taskText = input.value.trim();
-    if (taskText === '') {
-        showStatusMessage('Por favor, escribe una tarea para agregar.', false);
-        return;
+    const newTaskInput = document.getElementById('new-task-input');
+    const newDueDateInput = document.getElementById('due-date-input');
+    const taskText = newTaskInput.value.trim();
+    const dueDate = newDueDateInput.value;
+
+    if (taskText) {
+        // Obtenemos las tareas existentes, o un array vacío si no hay ninguna
+        const tasks = getTasks();
+        tasks.push({
+            text: taskText,
+            completed: false,
+            dueDate: dueDate || null // Si no se selecciona una fecha, se guarda como null
+        });
+        saveTasks(tasks);
+        newTaskInput.value = '';
+        newDueDateInput.value = ''; // Limpiamos también el campo de fecha
+        renderTasks();
+        showNotification('Tarea agregada con éxito.', 'success');
+    } else {
+        showNotification('Por favor, ingresa una tarea.', 'error');
     }
-    
-    const tasks = getTasks();
-    tasks.push({ text: taskText, completed: false });
-    saveTasks(tasks);
-    renderTasks();
-    input.value = ''; // Limpia el input
-    //showStatusMessage('Tarea agregada con éxito.', true);
 }
 
 // Marca una tarea como completada/incompleta
@@ -336,44 +347,60 @@ function deleteTask(index) {
 }
 
 // Función para alternar entre el modo de visualización y edición
-function toggleEditMode(index) {
-    const taskTextSpan = document.getElementById(`task-text-${index}`);
-    const taskInput = document.getElementById(`task-input-${index}`);
-    const editBtn = document.getElementById(`edit-btn-${index}`);
-    
-    // Si está en modo de edición, guardamos la tarea
-    if (taskInput.classList.contains('hidden')) {
-        // Modo de edición activado
-        taskTextSpan.classList.add('hidden');
-        taskInput.classList.remove('hidden');
-        taskInput.focus();
-        
-        // Cambiamos el icono a un disquete (guardar) y la función onclick
-        editBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                <polyline points="7 3 7 8 15 8"></polyline>
-            </svg>
-        `;
-        editBtn.onclick = () => saveTask(index);
 
-    } else {
-        // Modo de visualización activado (guardado)
-        const newText = taskInput.value.trim();
-        if (newText === '') {
-            showStatusMessage('El texto de la tarea no puede estar vacío.', false);
-            taskInput.focus();
-            return;
+// Actualiza la función toggleEditMode para manejar la edición de la fecha
+function toggleEditMode(index) {
+    const li = document.getElementById('todo-list').children[index];
+    const taskTextSpan = li.querySelector('.task-text');
+    const taskTextInput = li.querySelector('input[type="text"]');
+    const dueDateSpan = li.querySelector('.due-date-text');
+    const dueDatePicker = li.querySelector('.due-date-picker');
+    const editBtn = li.querySelector(`#edit-btn-${index}`);
+
+    const isEditing = li.classList.toggle('editing');
+
+    if (isEditing) {
+        // Modo de edición: ocultar el texto y mostrar los campos de entrada
+        taskTextSpan.classList.add('hidden');
+        taskTextInput.classList.remove('hidden');
+        
+        if (dueDateSpan && dueDatePicker) {
+            dueDateSpan.classList.add('hidden');
+            dueDatePicker.classList.remove('hidden');
         }
 
+        taskTextInput.focus();
+        editBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/></svg>`;
+    } else {
+        // Modo de visualización: guardar los cambios y ocultar los campos de entrada
         const tasks = getTasks();
-        tasks[index].text = newText;
-        saveTasks(tasks);
-        renderTasks();
-        //showStatusMessage('Tarea editada con éxito.', true);
+        const newText = taskTextInput.value.trim();
+        const newDueDate = dueDatePicker ? dueDatePicker.value : null;
+
+        if (newText !== "") {
+            tasks[index].text = newText;
+            if (newDueDate !== null) {
+                tasks[index].dueDate = newDueDate;
+            }
+            saveTasks(tasks);
+            renderTasks();
+            showNotification('Tarea editada con éxito.', 'success');
+        } else {
+            showNotification('La tarea no puede estar vacía.', 'error');
+            // Si la tarea está vacía, volvemos al modo de edición
+            li.classList.add('editing');
+            taskTextSpan.classList.remove('hidden');
+            taskTextInput.classList.add('hidden');
+            
+            if (dueDateSpan && dueDatePicker) {
+                dueDateSpan.classList.remove('hidden');
+                dueDatePicker.classList.add('hidden');
+            }
+        }
+        editBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232a2.5 2.5 0 013.536 3.536L6.5 21.036H3v-3.536l12.232-12.232zM15.232 5.232L18.768 8.768" /></svg>`;
     }
 }
+
 
 // Guarda la tarea editada. Esta función se llama desde toggleEditMode.
 function saveTask(index) {
