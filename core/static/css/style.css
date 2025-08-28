@@ -1,63 +1,75 @@
-/* Importamos la fuente Inter de Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+:root {
+    /* Variables de color para el modo claro */
+    --bg-body: #f3f4f6;
+    --bg-container: #ffffff;
+    --text-primary: #1f2937;
+    --text-secondary: #6b7280;
+    --input-bg: #f3f4f6;
+    --input-text: #1f2937;
+    --task-bg: #e5e7eb;
+    --task-completed-bg: #d1d5db;
+    --tab-text-color: #000000; /* Negro para el modo claro */
+}
+
+.dark {
+    /* Variables de color para el modo oscuro */
+    --bg-body: #111827;
+    --bg-container: #1f2937;
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --input-bg: #1f2937;
+    --input-text: #f9fafb;
+    --task-bg: #374151;
+    --task-completed-bg: #4b5563;
+    --tab-text-color: #ffffff; /* Blanco para el modo oscuro */
+}
+
 body {
     font-family: 'Inter', sans-serif;
-    transition: background-color 0.3s ease;
+    background-color: var(--bg-body);
+    color: var(--text-primary);
+    transition: background-color 0.3s, color 0.3s;
 }
 
-/* Estilos del modo claro */
-.light body {
-    background-color: #f3f4f6;
-}
-.light .bg-container {
-    background-color: #fff;
-    border-color: #e5e7eb;
-}
-.light .text-primary {
-    color: #1f2937;
-}
-.light .text-secondary {
-    color: #6b7280;
-}
-.light .bg-secondary {
-    background-color: #f9fafb;
-}
-.light .border-primary {
-    border-color: #d1d5db;
+.card {
+    background-color: var(--bg-container);
+    color: var(--text-primary);
+    transition: background-color 0.3s, color 0.3s;
 }
 
-/* Estilos del modo oscuro */
-.dark body {
-    background-color: #121212;
-}
-.dark .bg-container {
-    background-color: #1f2937;
-    border-color: #374151;
-}
-.dark .text-primary {
-    color: #e5e7eb;
-}
-.dark .text-secondary {
-    color: #9ca3af;
-}
-.dark .bg-secondary {
-    background-color: #374151;
-}
-.dark .border-primary {
-    border-color: #4b5563;
+/* Estilos para los campos de entrada */
+input[type="text"], input[type="date"], textarea {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    transition: background-color 0.3s, color 0.3s;
 }
 
-/* Ocultar la barra de desplazamiento en los contenedores de historial */
-.no-scrollbar::-webkit-scrollbar {
-    display: none;
+/* Estilos para las tareas de la lista */
+.todo-item {
+    background-color: var(--task-bg);
 }
-.no-scrollbar {
-    -ms-overflow-style: none;   /* IE y Edge */
-    scrollbar-width: none;      /* Firefox */
+.todo-item.completed {
+    background-color: var(--task-completed-bg);
 }
 
-/* Estilos para los elementos de la lista de tareas */
+/* Estilos para los botones de las pestañas */
+.tab-button {
+    transition: all 0.3s ease;
+    color: var(--tab-text-color);
+}
+
+/* Estilos para la linea de la pestaña activa */
+.tab-button.active {
+    border-bottom-width: 2px;
+}
+
 .todo-item.completed .task-text {
     text-decoration: line-through;
-    color: #6b7280; /* Color gris para tareas completadas */
+    color: var(--text-secondary);
+}
+
+.todo-item.dragging {
+    opacity: 0.5;
+    transform: scale(1.02);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
