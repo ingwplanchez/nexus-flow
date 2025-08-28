@@ -17,7 +17,12 @@
     <div class="max-w-4xl mx-auto rounded-xl shadow-lg p-6 sm:p-10 card">
         <!-- Encabezado de la aplicación -->
         <header class="flex flex-col sm:flex-row items-center justify-between mb-8">
-            <h1 class="text-3xl sm:text-4xl font-bold text-primary mb-4 sm:mb-0">Nexus FLow: TodoList + IA</h1>
+            <!-- <h1 class="text-3xl sm:text-4xl font-bold text-primary mb-4 sm:mb-0">Nexus FLow: TodoList +</h1> -->
+           
+            <div class="flex-grow">
+                <h1 class="text-2xl sm:text-3xl font-bold text-primary">Nexus Flow IA: TodoList + IA</h1>
+                <p class="text-sm sm:text-base text-secondary mt-1">Modelo de IA para la productividad</p>
+            </div>
             
             <div class="flex items-center space-x-4">
                 <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none transition-colors duration-300">
@@ -33,7 +38,7 @@
 
         <!-- Contenedor de las pestañas -->
         <div class="mb-6">
-            <div class="flex flex-wrap sm:space-x-4 mb-4 border-b-2 border-gray-200 dark:border-gray-700">
+            <div class="flex flex-wrap -mb-px text-sm font-medium  mb-4 border-b-2 border-gray-200 dark:border-gray-700">
                 <button id="tab-todo-list" onclick="openTab('todo-list-content')" class="tab-button flex-1 py-2 px-4 text-center rounded-t-lg border-b-2 border-teal-500 font-bold active">Tareas</button>
                 <button id="tab-eisenhower" onclick="openTab('eisenhower-content')" class="tab-button flex-1 py-2 px-4 text-center rounded-t-lg border-b-2 border-transparent hover:border-purple-500 hover:text-purple-500">Prioridad</button>
                 <button id="tab-laborit" onclick="openTab('laborit-content')" class="tab-button flex-1 py-2 px-4 text-center rounded-t-lg border-b-2 border-transparent hover:border-green-500 hover:text-green-500">Esfuerzo</button>
