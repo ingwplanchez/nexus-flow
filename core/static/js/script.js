@@ -158,8 +158,6 @@ function renderTasks() {
 
         const dueDateHtml = task.dueDate ? `<span class="text-xs text-secondary ml-4">Fecha: ${new Date(task.dueDate).toLocaleDateString()}</span>` : '';
         
-        //const dueDateText = task.dueDate ? `<span class="text-sm text-gray-500 dark:text-gray-400 ml-4 due-date-text">Fecha límite: ${formattedDueDate}</span>` : '';
-
         li.innerHTML = `
             <div class="flex items-center flex-grow">
                 <input type="checkbox" ${task.completed ? 'checked' : ''} class="h-5 w-5 rounded text-teal-500 border-gray-300 dark:border-gray-600 focus:ring-teal-500 toggle-task-checkbox">
@@ -320,7 +318,7 @@ function deleteTask(index) {
 function toggleEditMode(li, index) {
     const taskTextSpan = li.querySelector('.task-text');
     const taskTextInput = li.querySelector('.task-input');
-    const dueDateSpan = li.querySelector('.due-date-text');
+    const dueDateSpan = li.querySelector('span.text-xs.text-secondary.ml-4'); // Selecciona la etiqueta de la fecha
     const dueDatePicker = li.querySelector('.due-date-input');
     const editBtn = li.querySelector('.edit-task-btn');
 
@@ -329,7 +327,7 @@ function toggleEditMode(li, index) {
     if (isEditing) {
         taskTextSpan.classList.add('hidden');
         taskTextInput.classList.remove('hidden');
-        if (dueDateSpan) dueDateSpan.classList.add('hidden');
+        if (dueDateSpan) dueDateSpan.classList.add('hidden'); // Oculta el texto de la fecha
         if (dueDatePicker) dueDatePicker.classList.remove('hidden');
         taskTextInput.focus();
         editBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/></svg>`;
