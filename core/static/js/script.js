@@ -163,7 +163,7 @@ function renderTasks() {
         li.innerHTML = `
             <div class="flex items-center flex-grow">
                 <input type="checkbox" ${task.completed ? 'checked' : ''} class="h-5 w-5 rounded text-teal-500 border-gray-300 dark:border-gray-600 focus:ring-teal-500 toggle-task-checkbox">
-                <div class="flex flex-col ml-4 flex-grow">
+                <div class="flex flex-row ml-4 flex-grow">
                     <span class="text-primary task-text flex-grow">${task.text}</span>
                     ${dueDateHtml}
                     <input type="text" value="${task.text}" class="hidden flex-grow p-2 rounded-lg border border-teal-500 bg-container text-primary focus:outline-none task-input">
