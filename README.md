@@ -6,25 +6,59 @@ Este sistema utiliza el poder de la inteligencia artificial para analizar tus ta
 
 ## Características Principales
 
-* **Integración de IA (Nexus GEM):** El corazón del proyecto, donde se aplica la inteligencia artificial de Google Gemini para procesar la lógica de negocio y las recomendaciones.
+**Nexus Flow** combina la funcionalidad de una lista de tareas con cuatro potentes herramientas de productividad. El corazón del proyecto es la inteligencia artificial de Google Gemini para procesar la lógica de negocio y las recomendaciones.
 
-* **Matriz de Eisenhower:** Analiza y clasifica tus tareas automáticamente según su urgencia e importancia.
+* **Lista de Tareas (TodoList):** Una interfaz limpia e intuitiva para añadir, marcar como completadas y gestionar tus tareas diarias.
 
-* **Ley de Laborit y Pareto:** Evalúa tus listas de tareas para identificar la actividad de mayor impacto que debes abordar primero.
+* **Matriz de Eisenhower (Prioridad):** Analiza tus tareas para ayudarte a clasificarlas según su urgencia e importancia. Esta herramienta te guía para decidir qué hacer, qué planificar, qué delegar y qué eliminar.
 
-* **Ley de Yerkes-Dodson e Illich:** Examina tu plan diario para recomendar el mejor equilibrio entre esfuerzo y descanso, ayudándote a evitar el agotamiento.
+* **Ley de Laborit (Esfuerzo):** Identifica la tarea más difícil o "menos apetecible" de tu lista. Al abordar esta tarea primero, la aplicación te ayuda a superar la inercia y evitar la procrastinación.
 
-* **Arquitectura Robusta:** Construido con el framework **Django**, este proyecto ofrece una base sólida y escalable, lista para futuras expansiones.
+* **Ley Yerkes-Dodson (Plan Diario):** Analiza tu plan diario para ayudarte a optimizar el rendimiento. Sugiere cómo estructurar tu día para alcanzar un estado de "flujo" o rendimiento óptimo.
 
 ## Tecnologías Utilizadas
 
 * **Backend:** **Python** con el framework **Django**.
 
-* **Frontend:** **HTML5**, **CSS3** y **JavaScript**.
+* **Frontend:** **HTML5**, **CSS3**, **Tailwind CSS** y **JavaScript**.
 
 * **APIs:** **Google Gemini API** (para la inteligencia artificial).
 
 * **Otras librerías:** `django-cors-headers` (para seguridad y comunicación), `python-dotenv` (para la gestión de variables de entorno).
+
+-----
+## Capturas de Pantalla
+Aquí puedes ver **Nexus Flow** en acción, mostrando sus diferentes vistas y el soporte para el modo claro y oscuro.
+
+### Pestaña de Lista de Tareas (TodoList)
+
+![alt text](screenshots/todolist_view_light.png)
+
+#### Modo Oscuro:
+![alt text](screenshots/todolist_view_dark.png)
+
+### Pestaña de Prioridad (Matriz de Eisenhower):
+
+![alt text](screenshots/eisenhower_view_light.png)
+
+#### Modo Oscuro:
+![alt text](screenshots/eisenhower_view_dark.png)
+
+### Pestaña de Esfuerzo (Ley de Laborit):
+
+![alt text](screenshots/laborit_view_light.png)
+
+#### Modo Oscuro:
+![alt text](screenshots/laborit_view_dark.png)
+
+### Pestaña de Plan Diario (Ley Yerkes-Dodson):
+
+![alt text](screenshots/yerkes_view_light.png)
+
+#### Modo Oscuro:
+![alt text](screenshots/yerkes_view_dark.png)
+
+-----
 
 ## Cómo Iniciar el Proyecto
 
