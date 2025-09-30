@@ -22,7 +22,7 @@ if not API_KEY:
 
 # Configura la API de Google
 genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = genai.GenerativeModel('gemini-2.5-flash')
 
 # @login_required
 def index(request):
