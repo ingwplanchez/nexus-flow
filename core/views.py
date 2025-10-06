@@ -24,7 +24,7 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel('gemini-2.5-flash')
 
-# @login_required
+@login_required
 def index(request):
     """
     Ruta principal que renderiza el archivo index.html.
@@ -65,7 +65,7 @@ def logout_view(request):
         logout(request)
         return redirect('login') # Redirige a la página de inicio de sesión
 
-# @login_required
+@login_required
 @csrf_exempt
 def analyze_eisenhower(request):
     """Endpoint para la Matriz de Eisenhower. Ahora guarda la tarea."""
@@ -111,7 +111,7 @@ def analyze_eisenhower(request):
             return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "Método no permitido."}, status=405)
 
-# @login_required
+@login_required
 @csrf_exempt
 def analyze_laborit(request):
     """Endpoint para la Ley de Laborit."""
@@ -142,7 +142,7 @@ def analyze_laborit(request):
             return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "Método no permitido."}, status=405)
 
-# @login_required
+@login_required
 @csrf_exempt
 def analyze_yerkes_dodson(request):
     """Endpoint para la Ley de Yerkes-Dodson. Ahora guarda el plan."""
@@ -181,13 +181,13 @@ def analyze_yerkes_dodson(request):
             return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "Método no permitido."}, status=405)
 
-# @login_required
+@login_required
 def tasks_history(request):
     """Endpoint para obtener el historial de tareas del usuario logueado."""
     tasks = list(Task.objects.filter(user=request.user).order_by('-created_at').values('description', 'eisenhower_category', 'created_at'))
     return JsonResponse({'tasks': tasks})
 
-# @login_required
+@login_required
 def daily_plans_history(request):
     """Endpoint para obtener el historial de planes diarios del usuario logueado."""
     daily_plans = list(DailyPlan.objects.filter(user=request.user).order_by('-created_at').values('plan_text', 'created_at'))
